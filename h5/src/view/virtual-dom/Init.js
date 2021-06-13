@@ -1,6 +1,11 @@
+/**
+ * @module
+ **/
+
 import Enums from './Enums'
 import './Utils'
 
+// 设置网页根元素的 font-size
 const initFontSize = function () {
   document.addEventListener(
     'DOMContentLoaded',
@@ -14,7 +19,16 @@ const initFontSize = function () {
   )
 }
 
+/**
+ * 初始化：
+ * 1、在全局环境挂载 webview 引擎版本号。
+ * 2、设置网页根元素的 font-size。
+ **/
 const init = function () {
+  /**
+   * webview 引擎版本号
+   * @global
+   **/
   window.__webview_engine_version__ = 0.02
   initFontSize()
 }

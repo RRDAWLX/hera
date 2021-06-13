@@ -108,8 +108,8 @@ export default window.exparser.registerElement({
   },
   srcChanged: function (filePath, t) {
     if (filePath) {
-      var ua = (this.$.div, window.navigator.userAgent.toLowerCase()),
-        self = this
+      var ua = (this.$.div, window.navigator.userAgent.toLowerCase())
+      var self = this
       this._ready()
       var opts = {
         success: function (e) {
@@ -138,30 +138,30 @@ export default window.exparser.registerElement({
               }
             })
           : this._srcChanged(
-              filePath /* .replace(
+            filePath /* .replace(
                      'wdfile://',
                      'http://wxfile.open.weixin.qq.com/'
                      ) */
-            )
+          )
     }
   },
   _checkMode: function (styleKey) {
     var styles = [
-        'scaleToFill',
-        'aspectFit',
-        'aspectFill',
-        'top',
-        'bottom',
-        'center',
-        'left',
-        'right',
-        'top left',
-        'top right',
-        'bottom left',
-        'bottom right'
-      ],
-      res = !1,
-      i = 0
+      'scaleToFill',
+      'aspectFit',
+      'aspectFill',
+      'top',
+      'bottom',
+      'center',
+      'left',
+      'right',
+      'top left',
+      'top right',
+      'bottom left',
+      'bottom right'
+    ]
+    var res = !1
+    var i = 0
     for (; i < styles.length; i++) {
       if (styleKey == styles[i]) {
         res = !0
@@ -183,12 +183,12 @@ export default window.exparser.registerElement({
         this.$.div.style.backgroundSize = '100% 100%'
         break
       case 'aspectFit':
-        ;(this.$.div.style.backgroundSize = 'contain'),
-          (this.$.div.style.backgroundPosition = 'center center')
+        (this.$.div.style.backgroundSize = 'contain'),
+        (this.$.div.style.backgroundPosition = 'center center')
         break
       case 'aspectFill':
-        ;(this.$.div.style.backgroundSize = 'cover'),
-          (this.$.div.style.backgroundPosition = 'center center')
+        (this.$.div.style.backgroundSize = 'cover'),
+        (this.$.div.style.backgroundPosition = 'center center')
         break
       case 'widthFix':
         this.$.div.style.backgroundSize = '100% 100%'

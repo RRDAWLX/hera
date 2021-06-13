@@ -11,7 +11,9 @@ import canvas from './canvas'
 import * as storage from './storage'
 import appContextSwitch from './appContextSwitch'
 
+// 这一步不知道干啥，貌似没啥用
 import './evalGeneratorFunction'
+
 import './funcRewrite'
 import './initConsole'
 
@@ -30,18 +32,18 @@ function paramCheck (apiName, params, paramTpl) {
 }
 
 function paramCheckFail (apiName) {
-  var res = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {},
-    n = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : '',
-    errMsg = apiName + ':fail ' + n
+  var res = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}
+  var n = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : ''
+  var errMsg = apiName + ':fail ' + n
   console.error(errMsg)
   var fail = Reporter.surroundThirdByTryCatch(
-      options.fail || emptyFn,
-      'at api ' + apiName + ' fail callback function'
-    ),
-    complete = Reporter.surroundThirdByTryCatch(
-      options.complete || emptyFn,
-      'at api ' + apiName + ' complete callback function'
-    )
+    options.fail || emptyFn,
+    'at api ' + apiName + ' fail callback function'
+  )
+  var complete = Reporter.surroundThirdByTryCatch(
+    options.complete || emptyFn,
+    'at api ' + apiName + ' complete callback function'
+  )
   fail({
     errMsg: errMsg
   })
@@ -62,36 +64,37 @@ function checkUrl (apiName, params) {
 
 typeof logxx === 'function' && logxx('sdk start')
 
-var emptyFn = function () {},
-  pageData = {},
-  currUrl = '',
-  SDKVersion = '1.4.2',
-  appRouteCallbacks = [],
-  appRouteDoneCallback = [],
-  pageEventFn = void 0,
-  WX = {},
-  hasInvokeEnableAccelerometer = !1,
-  hasInvokeEnableCompass = !1,
-  accelerometerChangeFns = [],
-  compassChangeFns = [],
-  refreshSessionTimeHander = void 0,
-  curWebViewId = void 0,
-  currentClipBoardData = void 0,
-  loginSourceUrl = ''
+var emptyFn = function () {}
+var pageData = {}
+var currUrl = ''
+var SDKVersion = '1.4.2'
+var appRouteCallbacks = []
+var appRouteDoneCallback = []
+var pageEventFn = void 0
+var WX = {}
+var hasInvokeEnableAccelerometer = !1
+var hasInvokeEnableCompass = !1
+var accelerometerChangeFns = []
+var compassChangeFns = []
+var refreshSessionTimeHander = void 0
+var curWebViewId = void 0
+var currentClipBoardData = void 0
+var loginSourceUrl = ''
 
+// 处理输入框
 bridge.subscribe('SPECIAL_PAGE_EVENT', function (params) {
-  var data = params.data,
-    eventName = params.eventName,
-    ext = params.ext,
-    webViewId =
-      arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+  var data = params.data
+  var eventName = params.eventName
+  var ext = params.ext
+  var webViewId =
+    arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
   if (data && data.type == 'input' && typeof pageEventFn === 'function') {
     var res = pageEventFn({
-        data: data,
-        eventName: eventName,
-        webviewId: webViewId
-      }),
-      value = data.detail.value
+      data: data,
+      eventName: eventName,
+      webviewId: webViewId
+    })
+    var value = data.detail.value
     if (ext && ext.setKeyboardValue) {
       if (res === undefined) {
       } else if (utils.getDataType(res) === 'Object') {
@@ -114,20 +117,27 @@ bridge.subscribe('SPECIAL_PAGE_EVENT', function (params) {
   }
 })
 
+/**
+ * 报错检测
+ * @param {any} apiName
+ * @returns {any}
+ */
+
 var logErr = function (apiName) {
   var options =
-      arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {},
-    errMsg = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : ''
+    arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}
+  var errMsg =
+    arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : ''
   console.error(errMsg)
   Reporter.triggerErrorMessage(errMsg)
   var fail = Reporter.surroundThirdByTryCatch(
-      options.fail || emptyFn,
-      'at api ' + apiName + ' fail callback function'
-    ),
-    complete = Reporter.surroundThirdByTryCatch(
-      options.complete || emptyFn,
-      'at api ' + apiName + ' complete callback function'
-    )
+    options.fail || emptyFn,
+    'at api ' + apiName + ' fail callback function'
+  )
+  var complete = Reporter.surroundThirdByTryCatch(
+    options.complete || emptyFn,
+    'at api ' + apiName + ' complete callback function'
+  )
   fail({
     errMsg: errMsg
   })
@@ -135,9 +145,8 @@ var logErr = function (apiName) {
     errMsg: errMsg
   })
 }
-
+// // wx对象
 var apiObj = {
-  // wx对象
   invoke: bridge.invoke,
   on: bridge.on,
   drawCanvas: canvas.drawCanvas,
@@ -248,8 +257,8 @@ var apiObj = {
 
   pageScrollTo: function (param) {
     // 将页面滚动到目标位置
-    var target = getCurrentPages(),
-      viewId = target[target.length - 1].__wxWebviewId__
+    var target = getCurrentPages()
+    var viewId = target[target.length - 1].__wxWebviewId__
     if (
       param.hasOwnProperty('page') &&
       param.page.hasOwnProperty('__wxWebviewId__')
@@ -278,7 +287,7 @@ var apiObj = {
     var params =
       arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
     if (paramCheck('switchTab', params, { url: '' })) {
-      ;/\?.*$/.test(params.url) &&
+      /\?.*$/.test(params.url) &&
         (console.warn('wx.switchTab: url 不支持 queryString'),
         (params.url = params.url.replace(/\?.*$/, '')))
       params.url = utils.getRealRoute(currUrl, params.url)
@@ -298,7 +307,7 @@ var apiObj = {
     typeof params.delta !== 'number'
       ? (params.delta = 1)
       : ((params.delta = parseInt(params.delta)),
-        params.delta < 1 && (params.delta = 1))
+      params.delta < 1 && (params.delta = 1))
     bridge.invokeMethod('navigateBack', params)
   },
   getStorage: function (params) {
@@ -375,8 +384,8 @@ var apiObj = {
         return res
       }, {})
       params.method && (params.method = params.method.toUpperCase())
-      var headers = params.header || {},
-        requestMethod = 'GET'
+      var headers = params.header || {}
+      var requestMethod = 'GET'
       typeof params.method === 'string' &&
         (requestMethod = params.method.toUpperCase())
       var data
@@ -501,7 +510,7 @@ var apiObj = {
         utils.getPlatform() === 'devtools' &&
         utils.getDataType(params.data) === 'Blob'
           ? utils.blobToArrayBuffer(params.data, function (data) {
-            ;(params.data = data), callback(params)
+            (params.data = data), callback(params)
           })
           : callback(params)
       })
@@ -522,12 +531,12 @@ var apiObj = {
         typeof params.header !== 'undefined' &&
         (console.warn('uploadFile: header must be an object'),
         delete params.header),
-        typeof params.formData !== 'object' &&
+      typeof params.formData !== 'object' &&
           typeof params.formData !== 'undefined' &&
           (console.warn('uploadFile: formData must be an object'),
           delete params.formData)
-      var header = {},
-        formData = {}
+      var header = {}
+      var formData = {}
       params.header &&
         (header = utils.convertObjectValueToString(params.header))
       params.formData &&
@@ -579,8 +588,8 @@ var apiObj = {
     paramCheck('getImageInfo', params, { src: '' }) &&
       (/^(http|https):\/\//.test(params.src)
         ? bridge.invokeMethod(
-            'downloadFile',
-            { url: params.src },
+          'downloadFile',
+          { url: params.src },
           {
             afterSuccess: function (res) {
               params.src = res.tempFilePath
@@ -592,13 +601,13 @@ var apiObj = {
             },
             afterFail: function () {
               logErr(
-                  'getImageInfo',
-                  params,
-                  'getImageInfo:fail download image fail'
-                )
+                'getImageInfo',
+                params,
+                'getImageInfo:fail download image fail'
+              )
             }
           }
-          )
+        )
         : /^wdfile:\/\//.test(params.src)
           ? bridge.invokeMethod('getImageInfo', params, {
             beforeSuccess: function (rt) {
@@ -606,14 +615,14 @@ var apiObj = {
             }
           })
           : ((params.src = utils.getRealRoute(currUrl, params.src, !1)),
-            bridge.invokeMethod('getImageInfo', params, {
-              beforeSuccess: function (rt) {
-                rt.path = params.src
-              }
-            })))
+          bridge.invokeMethod('getImageInfo', params, {
+            beforeSuccess: function (rt) {
+              rt.path = params.src
+            }
+          })))
   },
   startRecord: function (params) {
-    ;(apiObj.appStatus === configFlags.AppStatus.BACK_GROUND &&
+    (apiObj.appStatus === configFlags.AppStatus.BACK_GROUND &&
       apiObj.hanged === !1) ||
       bridge.invokeMethod('startRecord', params)
   },
@@ -675,8 +684,8 @@ var apiObj = {
     })
   },
   getSystemInfoSync: function (params) {
-    var rt = {},
-      platform = utils.getPlatform()
+    var rt = {}
+    var platform = utils.getPlatform()
     bridge.invokeMethod(
       'getSystemInfo',
       {},
@@ -1016,8 +1025,8 @@ var apiObj = {
   },
   setAppData: function (data) {
     var options =
-        arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {},
-      webviewIds = arguments[2]
+      arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}
+    var webviewIds = arguments[2]
     arguments[3]
     options.forceUpdate =
       typeof options.forceUpdate !== 'undefined' && options.forceUpdate
@@ -1027,20 +1036,20 @@ var apiObj = {
       )
     }
     !(function () {
-      var hasUpdate = !1,
-        tmpData = {},
-        setCurData = function (key, value, type) {
-          hasUpdate = !0
-          tmpData[key] = value
-          type === 'Array' || type === 'Object'
-            ? (pageData[key] = JSON.parse(JSON.stringify(value)))
-            : (pageData[key] = value)
-        }
+      var hasUpdate = !1
+      var tmpData = {}
+      var setCurData = function (key, value, type) {
+        hasUpdate = !0
+        tmpData[key] = value
+        type === 'Array' || type === 'Object'
+          ? (pageData[key] = JSON.parse(JSON.stringify(value)))
+          : (pageData[key] = value)
+      }
       for (var oKey in data) {
-        var curValue = data[oKey],
-          gValue = pageData[oKey],
-          gValueType = utils.getDataType(gValue),
-          curValueType = utils.getDataType(curValue)
+        var curValue = data[oKey]
+        var gValue = pageData[oKey]
+        var gValueType = utils.getDataType(gValue)
+        var curValueType = utils.getDataType(curValue)
         gValueType !== curValueType
           ? setCurData(oKey, curValue, curValueType)
           : gValueType == 'Array' || gValueType == 'Object'
@@ -1060,7 +1069,7 @@ var apiObj = {
       }
       options.forceUpdate
         ? bridge.publish(
-            'appDataChange',
+          'appDataChange',
           {
             data: data,
             option: {
@@ -1068,8 +1077,8 @@ var apiObj = {
               forceUpdate: !0
             }
           },
-            webviewIds
-          )
+          webviewIds
+        )
         : hasUpdate &&
           bridge.publish(
             'appDataChange',
@@ -1100,10 +1109,10 @@ var apiObj = {
   onWebviewEvent: function (fn, t) {
     pageEventFn = fn
     bridge.subscribe('PAGE_EVENT', function (params) {
-      var data = params.data,
-        eventName = params.eventName,
-        webviewId =
-          arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+      var data = params.data
+      var eventName = params.eventName
+      var webviewId =
+        arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
       fn({
         data: data,
         eventName: eventName,
@@ -1112,19 +1121,17 @@ var apiObj = {
     })
   },
   onNativeEvent: function (fn) {
-    ;[
-      'onCanvasTouchStart',
-      'onCanvasTouchMove',
-      'onCanvasTouchEnd'
-    ].forEach(function (key) {
-      bridge.onMethod(key, function (data, webviewId) {
-        fn({
-          data: data,
-          eventName: key,
-          webviewId: webviewId
+    ['onCanvasTouchStart', 'onCanvasTouchMove', 'onCanvasTouchEnd'].forEach(
+      function (key) {
+        bridge.onMethod(key, function (data, webviewId) {
+          fn({
+            data: data,
+            eventName: key,
+            webviewId: webviewId
+          })
         })
-      })
-    })
+      }
+    )
   },
   hideKeyboard: function (params) {
     // bridge.publish('hideKeyboard', {}) // "devtools" ==  utils.getPlatform() ? bridge.publish("hideKeyboard", {}) :  bridge.invokeMethod("hideKeyboard", params)
@@ -1141,16 +1148,16 @@ var apiObj = {
   },
   showModal: function () {
     var params =
-        arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {},
-      options = {
-        title: '',
-        content: '',
-        confirmText: '确定',
-        cancelText: '取消',
-        showCancel: !0,
-        confirmColor: '#3CC51F',
-        cancelColor: '#000000'
-      }
+      arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
+    var options = {
+      title: '',
+      content: '',
+      confirmText: '确定',
+      cancelText: '取消',
+      showCancel: !0,
+      confirmColor: '#3CC51F',
+      cancelColor: '#000000'
+    }
     options = utils.extend(options, params)
     if (
       paramCheck('showModal', options, {
@@ -1164,16 +1171,16 @@ var apiObj = {
     ) {
       return options.confirmText.length > 4
         ? void logErr(
-            'showModal',
-            params,
-            'showModal:fail confirmText length should not large then 4'
-          )
+          'showModal',
+          params,
+          'showModal:fail confirmText length should not large then 4'
+        )
         : options.cancelText.length > 4
           ? void logErr(
-              'showModal',
-              params,
-              'showModal:fail cancelText length should not large then 4'
-            )
+            'showModal',
+            params,
+            'showModal:fail cancelText length should not large then 4'
+          )
           : bridge.invokeMethod('showModal', options, {
             beforeSuccess: function (rt) {
               rt.confirm = Boolean(rt.confirm)
@@ -1183,13 +1190,13 @@ var apiObj = {
   },
   showToast: function () {
     var params =
-        arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {},
-      options = {
-        duration: 1500,
-        title: '',
-        icon: 'success',
-        mask: !1
-      }
+      arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
+    var options = {
+      duration: 1500,
+      title: '',
+      icon: 'success',
+      mask: !1
+    }
     options = utils.extend(options, params)
     delete options.image
     ;['success', 'loading'].indexOf(options.icon) < 0 &&
@@ -1206,8 +1213,8 @@ var apiObj = {
   },
   showLoading: function () {
     var params =
-        arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {},
-      defaultArgs = { title: '', icon: 'loading', mask: !1, duration: 1e8 }
+      arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
+    var defaultArgs = { title: '', icon: 'loading', mask: !1, duration: 1e8 }
     defaultArgs = utils.extend(defaultArgs, params)
     params.image &&
       (defaultArgs.image = utils.getRealRoute(currUrl, params.image, !1))
@@ -1230,11 +1237,11 @@ var apiObj = {
   },
   showActionSheet: function () {
     var params =
-        arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {},
-      options = {
-        itemList: [],
-        itemColor: '#000000'
-      }
+      arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
+    var options = {
+      itemList: [],
+      itemColor: '#000000'
+    }
     options = utils.extend(options, params)
     options.cancelText = '取消'
     options.cancelColor = '#000000'
@@ -1243,10 +1250,10 @@ var apiObj = {
     ) {
       return params.itemList.length > 6
         ? void logErr(
-            'showActionSheet',
-            params,
-            'showActionSheet:fail parameter error: itemList should not be large than 6'
-          )
+          'showActionSheet',
+          params,
+          'showActionSheet:fail parameter error: itemList should not be large than 6'
+        )
         : bridge.invokeMethod('showActionSheet', options, {
           beforeCancel: function (t) {
             try {
@@ -1340,23 +1347,23 @@ var apiObj = {
   reportClipBoardData: function (param) {
     if (currentClipBoardData !== '') {
       var t =
-          getCurrentPages().find(function (e) {
-            return e.__wxWebviewId__ === curWebViewId
-          }) || {},
-        value = [
-          currentClipBoardData,
-          t.__route__,
-          param ? 1 : 0,
-          Object.keys(t.options)
-            .map(function (e) {
-              return (
-                encodeURIComponent(e) + '=' + encodeURIComponent(t.options[e])
-              )
-            })
-            .join('&')
-        ]
-          .map(encodeURIComponent)
-          .join(',')
+        getCurrentPages().find(function (e) {
+          return e.__wxWebviewId__ === curWebViewId
+        }) || {}
+      var value = [
+        currentClipBoardData,
+        t.__route__,
+        param ? 1 : 0,
+        Object.keys(t.options)
+          .map(function (e) {
+            return (
+              encodeURIComponent(e) + '=' + encodeURIComponent(t.options[e])
+            )
+          })
+          .join('&')
+      ]
+        .map(encodeURIComponent)
+        .join(',')
       Reporter.reportKeyValue({
         key: 'Clipboard',
         value: value,
@@ -1389,11 +1396,11 @@ var apiObj = {
   },
   canIuse: function () {
     var param1 =
-        arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : '',
-      param2 =
-        arguments.length > 1 && void 0 !== arguments[1]
-          ? arguments[1]
-          : SDKVersion
+      arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : ''
+    var param2 =
+      arguments.length > 1 && void 0 !== arguments[1]
+        ? arguments[1]
+        : SDKVersion
     if (typeof param1 !== 'string') {
       throw new utils.AppServiceSdkKnownError(
         'canIUse: schema should be an object'
@@ -1407,6 +1414,7 @@ var apiObj = {
   }
 }
 
+// 当app进入后台，获取剪贴板上的信息上报
 apiObj.onAppEnterBackground(function () {
   apiObj.getClipboardData({
     success: function (e) {
@@ -1415,209 +1423,213 @@ apiObj.onAppEnterBackground(function () {
     }
   })
 }),
-  apiObj.onAppEnterForeground(),
-  (apiObj.appStatus = configFlags.AppStatus.FORE_GROUND),
-  (apiObj.hanged = !1),
-  bridge.subscribe('INVOKE_METHOD', function (params, t) {
-    var name = params.name,
-      args = params.args
-    apiObj[name](args, !0)
-  }),
-  bridge.subscribe('WEBVIEW_ERROR_MSG', function (params, t) {
-    var msg = params.msg
-    Reporter.triggerErrorMessage(msg)
-  }),
-  bridge.onMethod('onAppRoute', function (params) {
-    var webviewId =
+apiObj.onAppEnterForeground(),
+(apiObj.appStatus = configFlags.AppStatus.FORE_GROUND),
+(apiObj.hanged = !1),
+// 执行wx对象上的方法
+bridge.subscribe('INVOKE_METHOD', function (params, t) {
+  var name = params.name
+  var args = params.args
+  apiObj[name](args, !0)
+}),
+// 没搜到调用
+bridge.subscribe('WEBVIEW_ERROR_MSG', function (params, t) {
+  var msg = params.msg
+  Reporter.triggerErrorMessage(msg)
+}),
+// 进入App 启动route
+bridge.onMethod('onAppRoute', function (params) {
+  var webviewId =
       arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
-    params.path = params.path.replace(/\.\w+(\?|$)/, '$1') // .substring(0, params.path.length - 5);
-    params.webviewId = params.webviewId ? params.webviewId : webviewId
-    currUrl = params.path
-    if (params.openType !== 'appLaunch') {
-      for (var n in params.query) {
-        params.query[n] = decodeURIComponent(params.query[n])
-      }
+  params.path = params.path.replace(/\.\w+(\?|$)/, '$1') // .substring(0, params.path.length - 5);
+  params.webviewId = params.webviewId ? params.webviewId : webviewId
+  currUrl = params.path
+  if (params.openType !== 'appLaunch') {
+    for (var n in params.query) {
+      params.query[n] = decodeURIComponent(params.query[n])
     }
-    if (params.openType == 'navigateBack' || params.openType == 'redirectTo') {
-      canvas.clearOldWebviewCanvas()
-    }
-    canvas.notifyWebviewIdtoCanvas(params.webviewId)
-    map.notifyWebviewIdtoMap(params.webviewId)
-    curWebViewId = params.webviewId
-    appRouteCallbacks.forEach(function (callback) {
-      callback(params)
-    })
-  }),
-  bridge.onMethod('onAppRouteDone', function (params) {
-    var webviewId =
+  }
+  if (params.openType == 'navigateBack' || params.openType == 'redirectTo') {
+    canvas.clearOldWebviewCanvas()
+  }
+  canvas.notifyWebviewIdtoCanvas(params.webviewId)
+  map.notifyWebviewIdtoMap(params.webviewId)
+  curWebViewId = params.webviewId
+  appRouteCallbacks.forEach(function (callback) {
+    callback(params)
+  })
+}),
+bridge.onMethod('onAppRouteDone', function (params) {
+  var webviewId =
       arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
-    params.path = params.path.replace(/\.\w+(\?|$)/, '$1') // params.path.substring(0, params.path.length - 5);
-    params.webviewId =
+  params.path = params.path.replace(/\.\w+(\?|$)/, '$1') // params.path.substring(0, params.path.length - 5);
+  params.webviewId =
       typeof params.webviewId !== 'undefined' ? params.webviewId : webviewId
-    currUrl = params.path
-    appRouteDoneCallback.forEach(function (fn) {
-      fn(params)
-    })
-    bridge.publish('onAppRouteDone', {}, [webviewId])
-  }),
-  bridge.onMethod('onKeyboardValueChange', function (params) {
-    var webviewId =
-        arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0,
-      pValue = params.value,
-      pCursor = params.cursor
-    if (params.data && typeof pageEventFn === 'function') {
-      var data = JSON.parse(params.data)
-      if (data.bindinput) {
-        var peRes
-        try {
-          peRes = pageEventFn({
-            data: {
-              type: 'input',
-              target: data.target,
-              currentTarget: data.target,
-              timeStamp: Date.now(),
-              touches: [],
-              detail: {
-                value: params.value,
-                cursor: params.cursor
-              }
-            },
-            eventName: data.bindinput,
-            webviewId: webviewId
-          })
-        } catch (e) {
-          throw new utils.AppServiceSdkKnownError('bind key input error')
-        }
-        if (data.setKeyboardValue) {
-          if (void 0 === peRes || peRes === null || peRes === !1);
-          else if (utils.getDataType(peRes) === 'Object') {
-            var opt = {
-              inputId: params.inputId
+  currUrl = params.path
+  appRouteDoneCallback.forEach(function (fn) {
+    fn(params)
+  })
+  // 广播
+  bridge.publish('onAppRouteDone', {}, [webviewId])
+}),
+bridge.onMethod('onKeyboardValueChange', function (params) {
+  var webviewId =
+      arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+  var pValue = params.value
+  var pCursor = params.cursor
+  if (params.data && typeof pageEventFn === 'function') {
+    var data = JSON.parse(params.data)
+    if (data.bindinput) {
+      var peRes
+      try {
+        peRes = pageEventFn({
+          data: {
+            type: 'input',
+            target: data.target,
+            currentTarget: data.target,
+            timeStamp: Date.now(),
+            touches: [],
+            detail: {
+              value: params.value,
+              cursor: params.cursor
             }
-            pValue != peRes.value && (opt.value = peRes.value + '')
-            isNaN(parseInt(peRes.cursor)) ||
+          },
+          eventName: data.bindinput,
+          webviewId: webviewId
+        })
+      } catch (e) {
+        throw new utils.AppServiceSdkKnownError('bind key input error')
+      }
+      if (data.setKeyboardValue) {
+        if (void 0 === peRes || peRes === null || peRes === !1);
+        else if (utils.getDataType(peRes) === 'Object') {
+          var opt = {
+            inputId: params.inputId
+          }
+          pValue != peRes.value && (opt.value = peRes.value + '')
+          isNaN(parseInt(peRes.cursor)) ||
               ((opt.cursor = parseInt(peRes.cursor)),
               typeof opt.value === 'undefined' && (opt.value = pValue),
               opt.cursor > opt.value.length && (opt.cursor = -1))
-            bridge.invokeMethod('setKeyboardValue', opt)
-          } else {
-            pValue != peRes &&
+          bridge.invokeMethod('setKeyboardValue', opt)
+        } else {
+          pValue != peRes &&
               bridge.invokeMethod('setKeyboardValue', {
                 value: peRes + '',
                 cursor: -1,
                 inputId: params.inputId
               })
-          }
         }
       }
     }
-    bridge.publish(
-      'setKeyboardValue',
-      {
-        value: pValue,
-        cursor: pCursor,
-        inputId: params.inputId
-      },
-      [webviewId]
-    )
-  })
+  }
+  bridge.publish(
+    'setKeyboardValue',
+    {
+      value: pValue,
+      cursor: pCursor,
+      inputId: params.inputId
+    },
+    [webviewId]
+  )
+})
 
 var getTouchInfo = function (touchInfo, eventKey, eventInfo) {
-    // 返回touch信息
-    var touches = [],
-      changedTouches = []
-    if (eventKey === 'onTouchStart') {
-      for (var i in touchInfo) {
-        touches.push(touchInfo[i])
-      }
-      var touchObj = {
-        x: eventInfo.touch.x,
-        y: eventInfo.touch.y,
-        identifier: eventInfo.touch.id
-      }
-      changedTouches.push(touchObj)
-      touches.push(touchObj)
-    } else if (eventKey === 'onTouchMove') {
-      for (var s in touchInfo) {
-        var curTouchInfo = touchInfo[s],
-          hasUpdate = !1
-        for (var f in eventInfo.touches) {
-          var touchObj = {
-            x: eventInfo.touches[f].x,
-            y: eventInfo.touches[f].y,
-            identifier: eventInfo.touches[f].id
-          }
-          if (
-            touchObj.identifier === curTouchInfo.identifier &&
-            (curTouchInfo.x !== touchObj.x || curTouchInfo.y !== touchObj.y)
-          ) {
-            touches.push(touchObj)
-            changedTouches.push(touchObj)
-            hasUpdate = !0
-            break
-          }
-        }
-        hasUpdate || touches.push(curTouchInfo)
-      }
-    } else if (eventKey === 'onTouchEnd') {
-      var touchObj = {
-        x: eventInfo.touch.x,
-        y: eventInfo.touch.y,
-        identifier: eventInfo.touch.id
-      }
-      for (var p in touchInfo) {
-        var curTouchInfo = touchInfo[p]
-        curTouchInfo.identifier === touchObj.identifier
-          ? changedTouches.push(touchObj)
-          : touches.push(curTouchInfo)
-      }
-    } else if (eventKey === 'onTouchCancel') {
-      for (var v in eventInfo.touches) {
+  // 返回touch信息
+  var touches = []
+  var changedTouches = []
+  if (eventKey === 'onTouchStart') {
+    for (var i in touchInfo) {
+      touches.push(touchInfo[i])
+    }
+    var touchObj = {
+      x: eventInfo.touch.x,
+      y: eventInfo.touch.y,
+      identifier: eventInfo.touch.id
+    }
+    changedTouches.push(touchObj)
+    touches.push(touchObj)
+  } else if (eventKey === 'onTouchMove') {
+    for (var s in touchInfo) {
+      var curTouchInfo = touchInfo[s]
+      var hasUpdate = !1
+      for (var f in eventInfo.touches) {
         var touchObj = {
-          x: eventInfo.touches[v].x,
-          y: eventInfo.touches[v].y,
-          identifier: eventInfo.touches[v].id
+          x: eventInfo.touches[f].x,
+          y: eventInfo.touches[f].y,
+          identifier: eventInfo.touches[f].id
         }
-        changedTouches.push(touchObj)
+        if (
+          touchObj.identifier === curTouchInfo.identifier &&
+          (curTouchInfo.x !== touchObj.x || curTouchInfo.y !== touchObj.y)
+        ) {
+          touches.push(touchObj)
+          changedTouches.push(touchObj)
+          hasUpdate = !0
+          break
+        }
       }
-    } else if (eventKey === 'onLongPress') {
+      hasUpdate || touches.push(curTouchInfo)
+    }
+  } else if (eventKey === 'onTouchEnd') {
+    var touchObj = {
+      x: eventInfo.touch.x,
+      y: eventInfo.touch.y,
+      identifier: eventInfo.touch.id
+    }
+    for (var p in touchInfo) {
+      var curTouchInfo = touchInfo[p]
+      curTouchInfo.identifier === touchObj.identifier
+        ? changedTouches.push(touchObj)
+        : touches.push(curTouchInfo)
+    }
+  } else if (eventKey === 'onTouchCancel') {
+    for (var v in eventInfo.touches) {
       var touchObj = {
-        x: eventInfo.touch.x,
-        y: eventInfo.touch.y,
-        identifier: eventInfo.touch.id
-      }
-      for (var b in touchInfo) {
-        touchInfo[b].identifier === touchObj.identifier
-          ? touches.push(touchObj)
-          : touches.push(touchInfo[b])
+        x: eventInfo.touches[v].x,
+        y: eventInfo.touches[v].y,
+        identifier: eventInfo.touches[v].id
       }
       changedTouches.push(touchObj)
     }
-    return {
-      touches: touches,
-      changedTouches: changedTouches
+  } else if (eventKey === 'onLongPress') {
+    var touchObj = {
+      x: eventInfo.touch.x,
+      y: eventInfo.touch.y,
+      identifier: eventInfo.touch.id
     }
-  },
-  touchEvents = {
-    onTouchStart: 'touchstart',
-    onTouchMove: 'touchmove',
-    onTouchEnd: 'touchend',
-    onTouchCancel: 'touchcancel',
-    onLongPress: 'longtap'
+    for (var b in touchInfo) {
+      touchInfo[b].identifier === touchObj.identifier
+        ? touches.push(touchObj)
+        : touches.push(touchInfo[b])
+    }
+    changedTouches.push(touchObj)
   }
-  ;[
-    'onTouchStart',
-    'onTouchMove',
-    'onTouchEnd',
-    'onTouchCancel',
-    'onLongPress'
-  ].forEach(function (eventName) {
-    bridge.onMethod(eventName, function (params) {
-      var webviewId =
-        arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0,
-        data = JSON.parse(params.data),
-        canvasNumber = data.canvasNumber
-      canvas.canvasInfo.hasOwnProperty(canvasNumber) ||
+  return {
+    touches: touches,
+    changedTouches: changedTouches
+  }
+}
+var touchEvents = {
+  onTouchStart: 'touchstart',
+  onTouchMove: 'touchmove',
+  onTouchEnd: 'touchend',
+  onTouchCancel: 'touchcancel',
+  onLongPress: 'longtap'
+}
+;[
+  'onTouchStart',
+  'onTouchMove',
+  'onTouchEnd',
+  'onTouchCancel',
+  'onLongPress'
+].forEach(function (eventName) {
+  bridge.onMethod(eventName, function (params) {
+    var webviewId =
+      arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+    var data = JSON.parse(params.data)
+    var canvasNumber = data.canvasNumber
+    canvas.canvasInfo.hasOwnProperty(canvasNumber) ||
       console.error(
         'No such canvas ' +
           canvasNumber +
@@ -1627,13 +1639,13 @@ var getTouchInfo = function (touchInfo, eventKey, eventInfo) {
           eventName +
           ' event.'
       )
-      var canvasData = canvas.canvasInfo[canvasNumber].data
-      if (canvasData[eventName] && typeof pageEventFn === 'function') {
-        var touchInfo = getTouchInfo(canvasData.lastTouches, eventName, params),
-          touches = touchInfo.touches,
-          changedTouches = touchInfo.changedTouches
-          ;(canvasData.lastTouches = touches),
-        (eventName === 'onTouchMove' && changedTouches.length === 0) ||
+    var canvasData = canvas.canvasInfo[canvasNumber].data
+    if (canvasData[eventName] && typeof pageEventFn === 'function') {
+      var touchInfo = getTouchInfo(canvasData.lastTouches, eventName, params)
+      var touches = touchInfo.touches
+      var changedTouches = touchInfo.changedTouches
+      ;(canvasData.lastTouches = touches),
+      (eventName === 'onTouchMove' && changedTouches.length === 0) ||
           pageEventFn({
             data: {
               type: touchEvents[eventName],
@@ -1645,82 +1657,82 @@ var getTouchInfo = function (touchInfo, eventKey, eventInfo) {
             eventName: canvasData[eventName],
             webviewId: webviewId
           })
+    }
+  })
+}),
+[
+  'onVideoPlay',
+  'onVideoPause',
+  'onVideoEnded',
+  'onVideoTimeUpdate',
+  'onVideoClickFullScreenBtn',
+  'onVideoClickDanmuBtn'
+].forEach(function (eventName) {
+  bridge.onMethod(eventName, function () {
+    var params =
+        arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
+    var webviewId = arguments[1]
+    var bindEventName = 'bind' + eventName.substring(7).toLowerCase()
+    var dataObj = JSON.parse(params.data)
+    var handlers = dataObj.handlers
+    var event = dataObj.event
+    var createdTimestamp = dataObj.createdTimestamp
+    if (handlers[bindEventName] && typeof pageEventFn === 'function') {
+      var data = {
+        type: bindEventName.substring(4),
+        target: event.target,
+        currentTarget: event.currentTarget,
+        timeStamp: Date.now() - createdTimestamp,
+        detail: {}
       }
-    })
-  }),
-  [
-    'onVideoPlay',
-    'onVideoPause',
-    'onVideoEnded',
-    'onVideoTimeUpdate',
-    'onVideoClickFullScreenBtn',
-    'onVideoClickDanmuBtn'
-  ].forEach(function (eventName) {
-    bridge.onMethod(eventName, function () {
-      var params =
-          arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {},
-        webviewId = arguments[1],
-        bindEventName = 'bind' + eventName.substring(7).toLowerCase(),
-        dataObj = JSON.parse(params.data),
-        handlers = dataObj.handlers,
-        event = dataObj.event,
-        createdTimestamp = dataObj.createdTimestamp
-      if (handlers[bindEventName] && typeof pageEventFn === 'function') {
-        var data = {
-          type: bindEventName.substring(4),
-          target: event.target,
-          currentTarget: event.currentTarget,
-          timeStamp: Date.now() - createdTimestamp,
-          detail: {}
-        }
-        bindEventName === 'bindtimeupdate' &&
+      bindEventName === 'bindtimeupdate' &&
           (data.detail = { currentTime: params.position })
-        pageEventFn({
-          data: data,
-          eventName: handlers[bindEventName],
-          webviewId: webviewId
-        })
-      }
-    })
-  }),
-  bridge.onMethod('onAccelerometerChange', function () {
-    var params =
+      pageEventFn({
+        data: data,
+        eventName: handlers[bindEventName],
+        webviewId: webviewId
+      })
+    }
+  })
+}),
+bridge.onMethod('onAccelerometerChange', function () {
+  var params =
       arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
-    arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
-    accelerometerChangeFns.forEach(function (fn) {
-      typeof fn === 'function' && fn(params)
-    })
-  }),
-  bridge.onMethod('onCompassChange', function () {
-    var params =
+  arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+  accelerometerChangeFns.forEach(function (fn) {
+    typeof fn === 'function' && fn(params)
+  })
+}),
+bridge.onMethod('onCompassChange', function () {
+  var params =
       arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
-    arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
-    compassChangeFns.forEach(function (fn) {
-      typeof fn === 'function' && fn(params)
-    })
-  }),
-  bridge.onMethod('onError', function () {
-    var params =
+  arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+  compassChangeFns.forEach(function (fn) {
+    typeof fn === 'function' && fn(params)
+  })
+}),
+bridge.onMethod('onError', function () {
+  var params =
       arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
-    arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
-    console.error(
-      'thirdScriptError',
-      '\n',
-      'sdk uncaught third Error',
-      '\n',
-      params.message,
-      '\n',
-      params.stack
-    )
-  }),
-  bridge.onMethod('onMapMarkerClick', function () {
-    var params =
-        arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {},
-      webViewId =
-        arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
-    if (params.data && typeof pageEventFn === 'function') {
-      var data = JSON.parse(params.data)
-      data.bindmarkertap &&
+  arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+  console.error(
+    'thirdScriptError',
+    '\n',
+    'sdk uncaught third Error',
+    '\n',
+    params.message,
+    '\n',
+    params.stack
+  )
+}),
+bridge.onMethod('onMapMarkerClick', function () {
+  var params =
+      arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
+  var webViewId =
+      arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+  if (params.data && typeof pageEventFn === 'function') {
+    var data = JSON.parse(params.data)
+    data.bindmarkertap &&
         pageEventFn({
           data: {
             markerId: data.markerId
@@ -1728,16 +1740,16 @@ var getTouchInfo = function (touchInfo, eventKey, eventInfo) {
           eventName: data.bindmarkertap,
           webviewId: webViewId
         })
-    }
-  }),
-  bridge.onMethod('onMapControlClick', function () {
-    var params =
-        arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {},
-      webviewId =
-        arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
-    if (params.data && typeof pageEventFn === 'function') {
-      var data = JSON.parse(params.data)
-      data.bindcontroltap &&
+  }
+}),
+bridge.onMethod('onMapControlClick', function () {
+  var params =
+      arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
+  var webviewId =
+      arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+  if (params.data && typeof pageEventFn === 'function') {
+    var data = JSON.parse(params.data)
+    data.bindcontroltap &&
         pageEventFn({
           data: {
             controlId: data.controlId
@@ -1745,15 +1757,15 @@ var getTouchInfo = function (touchInfo, eventKey, eventInfo) {
           eventName: data.bindcontroltap,
           webviewId: webviewId
         })
-    }
-  }),
-  bridge.onMethod('onMapRegionChange', function () {
-    var params =
-        arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {},
-      webviewId =
-        arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0,
-      mapInfo = map.mapInfo[webviewId + '_' + params.mapId]
-    mapInfo &&
+  }
+}),
+bridge.onMethod('onMapRegionChange', function () {
+  var params =
+      arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
+  var webviewId =
+      arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+  var mapInfo = map.mapInfo[webviewId + '_' + params.mapId]
+  mapInfo &&
       mapInfo.bindregionchange &&
       typeof pageEventFn === 'function' &&
       pageEventFn({
@@ -1763,14 +1775,14 @@ var getTouchInfo = function (touchInfo, eventKey, eventInfo) {
         eventName: mapInfo.bindregionchange,
         webviewId: webviewId
       })
-  }),
-  bridge.onMethod('onMapClick', function () {
-    var params =
-        arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {},
-      webviewId =
-        arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0,
-      mapInfo = map.mapInfo[webviewId + '_' + params.mapId]
-    mapInfo &&
+}),
+bridge.onMethod('onMapClick', function () {
+  var params =
+      arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}
+  var webviewId =
+      arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 0
+  var mapInfo = map.mapInfo[webviewId + '_' + params.mapId]
+  mapInfo &&
       mapInfo.bindtap &&
       typeof pageEventFn === 'function' &&
       pageEventFn({
@@ -1778,7 +1790,7 @@ var getTouchInfo = function (touchInfo, eventKey, eventInfo) {
         eventName: mapInfo.bindtap,
         webviewId: webviewId
       })
-  })
+})
 for (var key in apiObj) {
   addGetterForWX(key)
 }

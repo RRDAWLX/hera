@@ -48,12 +48,12 @@ function invokeDrawCanvas (canvasId, actions) {
 }
 
 function drawCanvas (params) {
-  var canvasId = params.canvasId,
-    actions = params.actions,
-    reserve = params.reserve,
-    success = params.success,
-    fail = params.fail,
-    complete = params.complete
+  var canvasId = params.canvasId
+  var actions = params.actions
+  var reserve = params.reserve
+  var success = params.success
+  var fail = params.fail
+  var complete = params.complete
   if (canvasId && Array.isArray(actions)) {
     var key = canvasDesString(webviewID, canvasId)
     if (typeof canvasIDs[key] === 'number') {
@@ -110,21 +110,21 @@ function canvasToTempFilePath (obj) {
         errMsg: 'canvasToTempFilePath: fail canvas is empty'
       }
       typeof obj.fail === 'function' && obj.fail(res),
-        typeof obj.complete === 'function' && obj.complete(res)
+      typeof obj.complete === 'function' && obj.complete(res)
     }
   }
 }
 
-var webviewID = (new EventEmitter2.EventEmitter2(), 0),
-  canvasInfo = {},
-  canvasIDs = {},
-  canvasOptions = {}
+var webviewID = (new EventEmitter2.EventEmitter2(), 0)
+var canvasInfo = {}
+var canvasIDs = {}
+var canvasOptions = {}
 
 ServiceJSBridge.subscribe('canvasInsert', function (event, t) {
-  var canvasId = event.canvasId,
-    canvasNumber = event.canvasNumber,
-    data = event.data,
-    key = canvasDesString(webviewID, canvasId)
+  var canvasId = event.canvasId
+  var canvasNumber = event.canvasNumber
+  var data = event.data
+  var key = canvasDesString(webviewID, canvasId)
 
   canvasInfo[canvasNumber] = {
     lastTouches: [],
@@ -148,17 +148,17 @@ ServiceJSBridge.subscribe('canvasInsert', function (event, t) {
 })
 
 ServiceJSBridge.subscribe('canvasRemove', function (params, t) {
-  var canvasId = params.canvasId,
-    canvasIndex = canvasDesString(webviewID, canvasId)
+  var canvasId = params.canvasId
+  var canvasIndex = canvasDesString(webviewID, canvasId)
   canvasIDs[canvasIndex] && delete canvasIDs[canvasIndex]
 })
 
 var createContext = function () {
-    return new context.Context()
-  },
-  createCanvasContext = function (e) {
-    return new context.Context(e)
-  }
+  return new context.Context()
+}
+var createCanvasContext = function (e) {
+  return new context.Context(e)
+}
 
 export default {
   canvasInfo,

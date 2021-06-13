@@ -85,8 +85,8 @@ export default !(function () {
     resetFormData: function () {
       this._keyboardShow &&
         ((this.__formResetCallback = !0), wd.hideKeyboard()),
-        (this.value = ''),
-        (this.showValue = '')
+      (this.value = ''),
+      (this.showValue = '')
     },
     getFormData: function (callback) {
       this._keyboardShow
@@ -96,7 +96,7 @@ export default !(function () {
     _formGetDataCallback: function () {
       typeof this.__formCallback === 'function' &&
         this.__formCallback(this.value),
-        (this.__formCallback = void 0)
+      (this.__formCallback = void 0)
     },
     _focusChange: function (getFocus) {
       return this._couldFocus(getFocus), getFocus
@@ -123,76 +123,76 @@ export default !(function () {
     attached: function () {
       var self = this
       this._placeholderClassChange(this.placeholderClass),
-        this._checkPlaceholderStyle(this.value),
-        (this._attached = !0),
-        (this._value = this.value),
-        this.updateInput(),
-        window.__onAppRouteDone &&
+      this._checkPlaceholderStyle(this.value),
+      (this._attached = !0),
+      (this._value = this.value),
+      this.updateInput(),
+      window.__onAppRouteDone &&
           this._couldFocus(this.autoFocus || this.focus),
-        (this.__routeDoneId = exparser.addListenerToElement(
-          document,
-          'routeDone',
-          function () {
-            self._couldFocus(self.autoFocus || self.focus)
-          }
-        )),
-        (this.__setKeyboardValueId = exparser.addListenerToElement(
-          document,
-          'setKeyboardValue',
-          function (event) {
-            if (self._keyboardShow) {
-              var value = event.detail.value,
-                cursor = event.detail.cursor
-              typeof value !== 'undefined' &&
+      (this.__routeDoneId = exparser.addListenerToElement(
+        document,
+        'routeDone',
+        function () {
+          self._couldFocus(self.autoFocus || self.focus)
+        }
+      )),
+      (this.__setKeyboardValueId = exparser.addListenerToElement(
+        document,
+        'setKeyboardValue',
+        function (event) {
+          if (self._keyboardShow) {
+            var value = event.detail.value
+            var cursor = event.detail.cursor
+            typeof value !== 'undefined' &&
                 ((self._value = value), (self.value = value)),
-                typeof cursor !== 'undefined' &&
+            typeof cursor !== 'undefined' &&
                   cursor != -1 &&
                   self.$.input.setSelectionRange(cursor, cursor)
-            }
           }
-        )),
-        (this.__hideKeyboardId = exparser.addListenerToElement(
-          document,
-          'hideKeyboard',
-          function (t) {
-            self._keyboardShow && self.$.input.blur()
-          }
-        )),
-        (this.__onDocumentTouchStart = this.onDocumentTouchStart.bind(this)),
-        (this.__updateInput = this.updateInput.bind(this)),
-        (this.__inputKeyUp = this._inputKeyUp.bind(this)),
-        this.$.input.addEventListener('keyup', this.__inputKeyUp),
-        document.addEventListener('touchstart', this.__onDocumentTouchStart),
-        document.addEventListener('pageReRender', this.__updateInput),
-        (this.autoFocus || this.focus) &&
+        }
+      )),
+      (this.__hideKeyboardId = exparser.addListenerToElement(
+        document,
+        'hideKeyboard',
+        function (t) {
+          self._keyboardShow && self.$.input.blur()
+        }
+      )),
+      (this.__onDocumentTouchStart = this.onDocumentTouchStart.bind(this)),
+      (this.__updateInput = this.updateInput.bind(this)),
+      (this.__inputKeyUp = this._inputKeyUp.bind(this)),
+      this.$.input.addEventListener('keyup', this.__inputKeyUp),
+      document.addEventListener('touchstart', this.__onDocumentTouchStart),
+      document.addEventListener('pageReRender', this.__updateInput),
+      (this.autoFocus || this.focus) &&
           setTimeout(function () {
             self._couldFocus(self.autoFocus || self.focus)
           }, 500)
     },
     detached: function () {
       document.removeEventListener('pageReRender', this.__updateInput),
-        document.removeEventListener('touchstart', this.__onDocumentTouchStart),
-        this.$.input.removeEventListener('keyup', this.__inputKeyUp),
-        exparser.removeListenerFromElement(
-          document,
-          'routeDone',
-          this.__routeDoneId
-        ),
-        exparser.removeListenerFromElement(
-          document,
-          'hideKeyboard',
-          this.__hideKeyboardId
-        ),
-        exparser.removeListenerFromElement(
-          document,
-          'onKeyboardComplete',
-          this.__onKeyboardCompleteId
-        ),
-        exparser.removeListenerFromElement(
-          document,
-          'setKeyboardValue',
-          this.__setKeyboardValueId
-        )
+      document.removeEventListener('touchstart', this.__onDocumentTouchStart),
+      this.$.input.removeEventListener('keyup', this.__inputKeyUp),
+      exparser.removeListenerFromElement(
+        document,
+        'routeDone',
+        this.__routeDoneId
+      ),
+      exparser.removeListenerFromElement(
+        document,
+        'hideKeyboard',
+        this.__hideKeyboardId
+      ),
+      exparser.removeListenerFromElement(
+        document,
+        'onKeyboardComplete',
+        this.__onKeyboardCompleteId
+      ),
+      exparser.removeListenerFromElement(
+        document,
+        'setKeyboardValue',
+        this.__setKeyboardValueId
+      )
     },
     onDocumentTouchStart: function () {
       this._keyboardShow && this.$.input.blur()
@@ -219,14 +219,14 @@ export default !(function () {
         this.$.input.focus())
     },
     _inputBlur: function (e) {
-      ;(this._keyboardShow = !1),
-        (this.value = this._value),
-        this._formGetDataCallback(),
-        this.triggerEvent('change', { value: this.value }),
-        this.triggerEvent('blur', {
-          value: this.value
-        }),
-        this._checkPlaceholderStyle(this.value)
+      (this._keyboardShow = !1),
+      (this.value = this._value),
+      this._formGetDataCallback(),
+      this.triggerEvent('change', { value: this.value }),
+      this.triggerEvent('blur', {
+        value: this.value
+      }),
+      this._checkPlaceholderStyle(this.value)
     },
     _inputKeyUp: function (event) {
       if (event.keyCode == 13) {
@@ -271,28 +271,28 @@ export default !(function () {
       return !1
     },
     updateInput: function () {
-      var styles = window.getComputedStyle(this.$$),
-        bounds = this.$$.getBoundingClientRect(),
-        pos = (['Left', 'Right'].map(function (type) {
-          return (
-            parseFloat(styles['border' + type + 'Width']) +
+      var styles = window.getComputedStyle(this.$$)
+      var bounds = this.$$.getBoundingClientRect()
+      var pos = (['Left', 'Right'].map(function (type) {
+        return (
+          parseFloat(styles['border' + type + 'Width']) +
             parseFloat(styles['padding' + type])
-          )
-        }),
-        ['Top', 'Bottom'].map(function (type) {
-          return (
-            parseFloat(styles['border' + type + 'Width']) +
+        )
+      }),
+      ['Top', 'Bottom'].map(function (type) {
+        return (
+          parseFloat(styles['border' + type + 'Width']) +
             parseFloat(styles['padding' + type])
-          )
-        })),
-        inputObj = this.$.input,
-        height = bounds.height - pos[0] - pos[1]
+        )
+      }))
+      var inputObj = this.$.input
+      var height = bounds.height - pos[0] - pos[1]
       height != this.__lastHeight &&
         ((inputObj.style.height = height + 'px'), (this.__lastHeight = height)),
-        (inputObj.style.color = styles.color)
+      (inputObj.style.color = styles.color)
       var ele = this.$.placeholder
       ;(ele.style.height = bounds.height - pos[0] - pos[1] + 'px'),
-        (ele.style.lineHeight = ele.style.height)
+      (ele.style.lineHeight = ele.style.height)
     },
     defaultValueChange: function (value, t) {
       this.maxlength > 0 && (value = value.slice(0, this.maxlength))
@@ -312,8 +312,8 @@ export default !(function () {
       }
     },
     _checkPlaceholderStyle: function (hide) {
-      var phClasss = this._placeholderClass || [],
-        placeholderNode = this.$.placeholder
+      var phClasss = this._placeholderClass || []
+      var placeholderNode = this.$.placeholder
       if (hide) {
         if (
           this._placeholderShow &&
@@ -326,7 +326,7 @@ export default !(function () {
               placeholderNode.classList.remove(phClasss[i])
           }
         }
-        ;(placeholderNode.style.display = 'none'), (this._placeholderShow = !1)
+        (placeholderNode.style.display = 'none'), (this._placeholderShow = !1)
       } else {
         if (
           !this._placeholderShow &&
@@ -339,9 +339,9 @@ export default !(function () {
             placeholderNode.classList.add(phClasss[i])
           }
         }
-        ;(placeholderNode.style.display = ''),
-          this.updateInput(),
-          (this._placeholderShow = !0)
+        (placeholderNode.style.display = ''),
+        this.updateInput(),
+        (this._placeholderShow = !0)
       }
     }
   })

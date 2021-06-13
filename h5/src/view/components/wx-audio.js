@@ -56,9 +56,9 @@ export default window.exparser.registerElement({
     }
   },
   _reset: function () {
-    ;(this._buttonType = 'play'),
-      (this._currentTime = '00:00'),
-      (this._duration = '00:00')
+    (this._buttonType = 'play'),
+    (this._currentTime = '00:00'),
+    (this._duration = '00:00')
   },
   _readySrc: function () {
     this._canSrc = !0
@@ -114,8 +114,8 @@ export default window.exparser.registerElement({
       }
       var pattern = null
       if ((pattern = /^set([a-z|A-Z]*)/.exec(method)) != null) {
-        var mkey = pattern[1],
-          data = act.data
+        var mkey = pattern[1]
+        var data = act.data
         mkey = mkey[0].toLowerCase() + mkey.slice(1)
         mkey == 'currentTime'
           ? this.$.player.readyState === 0 || this.$.player.readyState === 1
@@ -144,8 +144,8 @@ export default window.exparser.registerElement({
     }
   },
   attached: function () {
-    var self = this,
-      player = this.$.player
+    var self = this
+    var player = this.$.player
     this.$.button.onclick = function (e) {
       e.stopPropagation()
       self.action = {

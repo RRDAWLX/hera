@@ -1,0 +1,13 @@
+{
+  "source": {
+    "include": ["src"],
+    "exclude": ["src/template"]
+  },
+
+  "opts": {
+    "destination": "./jsdocs/",
+    "private": true,
+    "recurse": true,
+    "template": "node_modules/tui-jsdoc-template"
+  }
+}

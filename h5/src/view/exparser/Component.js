@@ -1,9 +1,13 @@
-import Events from './Events'
-import * as EventManager from './EventManager'
-import Template from './Template'
-import Behavior from './Behavior'
-import Element from './Element'
-import Observer from './Observer'
+/**
+ * @module
+ **/
+
+import Event from './event'
+import * as eventManager from './event-manager'
+import Template from './template'
+import Behavior from './behavior'
+import Element from './element'
+import Observer from './observer'
 
 function camelToDashed (txt) {
   return txt.replace(/[A-Z]/g, function (ch) {
@@ -11,141 +15,198 @@ function camelToDashed (txt) {
   })
 }
 
-const addListenerToElement = EventManager.addListenerToElement
+const addListenerToElement = eventManager.addListenerToElement
+const component = {}
 
-const Component = function () {}
+/**
+ * 已注册的组件定义。
+ * @type {Object}
+ **/
+component.list = Object.create(null)
 
-Component.prototype = Object.create(Object.prototype, {
-  constructor: {
-    value: Component,
-    writable: true,
-    configurable: true
-  }
-})
+// 不直接引用 component，为了避免循环引用。
+Template.setCompnentSystem(component)
+Element.setCompnentSystem(component)
 
-Component.list = Object.create(null)
-Template._setCompnentSystem(Component)
-Element._setCompnentSystem(Component)
+// attribute(this, prop, propName, value)
+/**
+ * 设置 ele 对应的 dom 元素的属性。
+ * @param {Element} ele
+ * @param {Object} opt 属性定义对象
+ * @param {Function} opt.type 值类型，值为各种构造函数：Boolean、Array……
+ * 如果是 Object，则不会设置属性值。
+ * @param {String} propName
+ * @param {*} value
+ * @private
+ **/
+function setAttribute (ele, opt, propName, value) {
+  propName = camelToDashed(propName)
+  let dom = ele.__domElement
 
-Component._setGlobalOptionsGetter = function (GlobalOptionsGetter) {
-  Template._setGlobalOptionsGetter(GlobalOptionsGetter)
-}
-
-// attribute(this, prop, propKey, value)
-const setAttribute = function (ele, opt, propKey, value) {
-  let propName = camelToDashed(propKey)
   if (opt.type === Boolean) {
-    value
-      ? ele.__domElement.setAttribute(propName, '')
-      : ele.__domElement.removeAttribute(propName)
-  } else {
-    if (opt.type !== Object) {
-      if (opt.type === Array) {
-        ele.__domElement.setAttribute(propName, JSON.stringify(value))
-      } else {
-        ele.__domElement.setAttribute(propName, value)
-      }
-    }
+    value ? dom.setAttribute(propName, '') : dom.removeAttribute(propName)
+  } else if (opt.type === Array) {
+    dom.setAttribute(propName, JSON.stringify(value))
+  } else if (opt.type !== Object) {
+    dom.setAttribute(propName, value)
   }
 }
 
-const normalizeValue = function (value, type) {
+/**
+ * 根据值类型生成标准化的值。
+ * @param {*} value
+ * @param {Function} type 值类型构造函数，String、Number、Boolean、Array、Object……
+ * @return {*}
+ **/
+function getNormalizedValue (value, type) {
   switch (type) {
     case String:
-      return value === null || undefined === value ? '' : String(value)
+      return value === null || value === undefined ? '' : String(value)
+
     case Number:
       return isFinite(value) ? Number(value) : false
+
     case Boolean:
       return !!value
+
     case Array:
-      return value instanceof Array ? value : []
+      return Array.isArray(value) ? value : []
+
     case Object:
       return typeof value === 'object' ? value : null
+
     default:
-      return void 0 === value ? null : value
+      return undefined === value ? null : value
   }
 }
 
-// registerElement
-Component.register = function (nElement) {
+/**
+ * 根据类型返回属性默认值
+ * @param {Function} type 类型构造函数，Boolean、Array……
+ * @return {*} type 值为不同值时返回的默认值如下：
+ * 1、BOOlean，默认值 false；
+ * 2、String，默认值 '';
+ * 3、Number，默认值 0;
+ * 4、Array，默认值 [];
+ * 5、其他，默认值 null。
+ **/
+function getDefaultPropValue (type) {
+  switch (type) {
+    case Boolean:
+      return false
+
+    case String:
+      return ''
+
+    case Number:
+      return 0
+
+    case Array:
+      return []
+
+    default:
+      return null
+  }
+}
+
+/**
+ * 注册组件
+ * @param {Object} nElement 选项数据
+ * @param {String} [nElement.is=''] 组件名
+ * @param {Object} [nElement.options={}]
+ **/
+component.register = function (nElement) {
   let opts = nElement.options || {}
+  // 组件原型属性定义
   let propDefination = {
     is: {
       value: nElement.is || ''
     }
   }
-  let componentBehavior = Behavior.create(nElement)
+  let componentBehavior = new Behavior(nElement)
   let behaviorProperties = Object.create(null)
 
+  // 添加属性定义
   Object.keys(componentBehavior.properties).forEach(function (propKey) {
     let behaviorProperty = componentBehavior.properties[propKey]
-    ;(behaviorProperty !== String &&
-      behaviorProperty !== Number &&
-      behaviorProperty !== Boolean &&
-      behaviorProperty !== Object &&
-      behaviorProperty !== Array) ||
-      (behaviorProperty = {
+
+    if (
+      behaviorProperty === String ||
+      behaviorProperty === Number ||
+      behaviorProperty === Boolean ||
+      behaviorProperty === Object ||
+      behaviorProperty === Array
+    ) {
+      behaviorProperty = {
         type: behaviorProperty
-      })
+      }
+    }
+
     if (undefined === behaviorProperty.value) {
-      behaviorProperty.type === String
-        ? (behaviorProperty.value = '')
-        : behaviorProperty.type === Number
-          ? (behaviorProperty.value = 0)
-          : behaviorProperty.type === Boolean
-            ? (behaviorProperty.value = !1)
-            : behaviorProperty.type === Array
-              ? (behaviorProperty.value = [])
-              : (behaviorProperty.value = null)
+      behaviorProperty.value = getDefaultPropValue(behaviorProperty.type)
     }
 
     behaviorProperties[propKey] = {
       type: behaviorProperty.type,
       value: behaviorProperty.value,
+      // Function，赋值时值强制转换函数，返回转换后的值，返回 undefined 表示不做转换。
       coerce: componentBehavior.methods[behaviorProperty.coerce],
+      // Function
       observer: componentBehavior.methods[behaviorProperty.observer],
+      // Boolan，是否为 dom 属性
       public: !!behaviorProperty.public
     }
 
     propDefination[propKey] = {
       enumerable: true,
+
       get: function () {
-        let propData = this.__propData[propKey]
-        return void 0 === propData
-          ? behaviorProperties[propKey].value
-          : propData
+        let value = this.__propData[propKey]
+        return undefined === value ? behaviorProperties[propKey].value : value
       },
+
       set: function (value) {
         let behProp = behaviorProperties[propKey]
-        value = normalizeValue(value, behProp.type)
-        let propData = this.__propData[propKey] // old value
+        value = getNormalizedValue(value, behProp.type)
+        let oldValue = this.__propData[propKey]
 
+        // 转换 value
         if (behProp.coerce) {
-          let realVal = Events.safeCallback(
+          let realVal = Event.safeCallback(
             'Property Filter',
             behProp.coerce,
             this,
-            [value, propData]
+            [value, oldValue]
           )
-          void 0 !== realVal && (value = realVal)
+
+          if (realVal !== undefined) {
+            value = realVal
+          }
         }
 
-        if (value !== propData) {
-          // value changed
+        if (value !== oldValue) {
+          // 更新属性
           this.__propData[propKey] = value
+          // 更新 dom 属性
           behProp.public && setAttribute(this, behProp, propKey, value)
+          // 更新模板？？？
           this.__templateInstance.updateValues(this, this.__propData, propKey)
-          behProp.observer &&
-            Events.safeCallback('Property Observer', behProp.observer, this, [
+
+          // 调用属性上的监听器
+          if (behProp.observer) {
+            Event.safeCallback('Property Observer', behProp.observer, this, [
               value,
-              propData
+              oldValue
             ])
+          }
+
+          // 调用组件上的监听器
           if (behProp.public) {
             if (
               (this.__propObservers && !this.__propObservers.empty) ||
               this.__subtreeObserversCount
             ) {
-              Observer._callObservers(this, '__propObservers', {
+              Observer.callObservers(this, '__propObservers', {
                 type: 'properties',
                 target: this,
                 propertyName: propKey
@@ -157,140 +218,188 @@ Component.register = function (nElement) {
     }
   }) // end forEach
 
+  // 组件实例原型
   let proto = Object.create(Element.prototype, propDefination)
   proto.__behavior = componentBehavior
+
   for (let methodName in componentBehavior.methods) {
     proto[methodName] = componentBehavior.methods[methodName]
   }
+
   proto.__lifeTimeFuncs = componentBehavior.getAllLifeTimeFuncs()
-  let publicProps = Object.create(null),
-    defaultValuesJSON = {}
+  let publicProps = (proto.__propPublic = Object.create(null))
+  let defaultValues = {}
+
   for (let propName in behaviorProperties) {
-    defaultValuesJSON[propName] = behaviorProperties[propName].value
+    defaultValues[propName] = behaviorProperties[propName].value
     publicProps[propName] = !!behaviorProperties[propName].public
   }
 
-  let insElement = document.getElementById(componentBehavior.is)
+  // 定义组件模板
+  let template = document.getElementById(componentBehavior.is)
+
   if (
     !componentBehavior.template &&
-    insElement &&
-    insElement.tagName === 'TEMPLATE'
+    template &&
+    template.tagName === 'TEMPLATE'
   ) {
+    // eslint-disable-next-line
   } else {
-    insElement = document.createElement('template')
-    insElement.innerHTML = componentBehavior.template || ''
+    template = document.createElement('template')
+    template.innerHTML = componentBehavior.template || ''
   }
 
-  let template = Template.create(
-    insElement,
-    defaultValuesJSON,
+  template = new Template(
+    template,
+    defaultValues,
     componentBehavior.methods,
     opts
   )
-  proto.__propPublic = publicProps
-  let allListeners = componentBehavior.getAllListeners(),
-    innerEvents = Object.create(null)
+
+  // 定义组件内部事件
+  let innerEvents = Object.create(null)
+  let allListeners = componentBehavior.getAllListeners()
+
   for (let listenerName in allListeners) {
-    let listener = allListeners[listenerName],
-      eventList = [],
-      idx = 0
-    for (; idx < listener.length; idx++) {
-      eventList.push(componentBehavior.methods[listener[idx]])
+    let callbacks = []
+
+    for (let methodName of allListeners[listenerName]) {
+      callbacks.push(componentBehavior.methods[methodName])
     }
-    innerEvents[listenerName] = eventList
+
+    innerEvents[listenerName] = callbacks
   }
-  Component.list[componentBehavior.is] = {
-    proto: proto,
-    template: template,
-    defaultValuesJSON: JSON.stringify(defaultValuesJSON),
-    innerEvents: innerEvents
+
+  component.list[componentBehavior.is] = {
+    proto,
+    template,
+    defaultValuesJSON: JSON.stringify(defaultValues),
+    innerEvents
   }
 }
 
-// createElement
-Component.create = function (tagName) {
+/**
+ * 创建组件实例，实际上是 Element 实例。
+ * @param {String} [tagName="virtual"]
+ * @return {Element}
+ **/
+component.create = function (tagName) {
+  // 生成组件 DOM 根节点
   tagName = tagName ? tagName.toLowerCase() : 'virtual'
-  let newElement = document.createElement(tagName)
-  let sysComponent = Component.list[tagName] || Component.list['']
-  let newComponent = Object.create(sysComponent.proto) // 虚拟dom
-
+  let domEle = document.createElement(tagName)
+  // 初始化组件实例
+  let componentDefine = component.list[tagName] || component.list['']
+  let newComponent = Object.create(componentDefine.proto)
   Element.initialize(newComponent)
-  newComponent.__domElement = newElement
-  newElement.__wxElement = newComponent
-  newComponent.__propData = JSON.parse(sysComponent.defaultValuesJSON)
-  let templateInstance = (newComponent.__templateInstance = sysComponent.template.createInstance(
+  // 关联组件实例、组件 DOM 根节点、模板实例
+  // element prop
+  newComponent.__domElement = domEle
+  domEle.__wxElement = newComponent
+  newComponent.__propData = JSON.parse(componentDefine.defaultValuesJSON)
+  // element prop
+  newComponent.__templateInstance = componentDefine.template.createInstance(
     newComponent
-  )) // 参数多余？
+  ) // 参数多余？
+  let tmplIns = newComponent.__templateInstance
 
-  if (templateInstance.shadowRoot instanceof Element) {
-    // VirtualNode
-    Element._attachShadowRoot(newComponent, templateInstance.shadowRoot)
-    newComponent.shadowRoot = templateInstance.shadowRoot
-    newComponent.__slotChildren = [templateInstance.shadowRoot]
-    templateInstance.shadowRoot.__slotParent = newComponent
+  if (tmplIns.shadowRoot instanceof Element) {
+    Element._attachShadowRoot(newComponent, tmplIns.shadowRoot)
+    // element prop
+    newComponent.shadowRoot = tmplIns.shadowRoot
+    newComponent.__slotChildren = [tmplIns.shadowRoot]
+    tmplIns.shadowRoot.__slotParent = newComponent
   } else {
-    newComponent.__domElement.appendChild(templateInstance.shadowRoot)
-    newComponent.shadowRoot = newElement
-    newComponent.__slotChildren = newElement.childNodes
+    newComponent.__domElement.appendChild(tmplIns.shadowRoot)
+    newComponent.shadowRoot = domEle
+    newComponent.__slotChildren = domEle.childNodes
   }
 
   newComponent.shadowRoot.__host = newComponent
-  newComponent.$ = templateInstance.idMap
-  newComponent.$$ = newElement
-  templateInstance.slots[''] || (templateInstance.slots[''] = newElement)
-  newComponent.__slots = templateInstance.slots // 占位节点
+  // element prop
+  newComponent.$ = tmplIns.idMap
+  // element prop
+  newComponent.$$ = domEle
+
+  if (!tmplIns.slots['']) {
+    tmplIns.slots[''] = domEle
+  }
+
+  newComponent.__slots = tmplIns.slots // 占位节点
   newComponent.__slots[''].__slotChildren = newComponent.childNodes
 
-  let innerEvents = sysComponent.innerEvents
+  let innerEvents = componentDefine.innerEvents
+
+  // 绑定事件
   for (let innerEventName in innerEvents) {
     let innerEventNameSlice = innerEventName.split('.', 2)
-    let listenerName = innerEventNameSlice[innerEventNameSlice.length - 1]
+    let eventName = innerEventNameSlice[innerEventNameSlice.length - 1]
     let nComponent = newComponent
-    let isRootNode = true
+    let isRootNodeEvent = true
+
+    // 找到绑定事件的节点
     if (innerEventNameSlice.length === 2) {
-      if (innerEventNameSlice[0] !== '') {
-        isRootNode = !1
-        innerEventNameSlice[0] !== 'this' &&
-          (nComponent = newComponent.$[innerEventNameSlice[0]])
-      }
-    }
-    if (nComponent) {
-      let innerEvent = innerEvents[innerEventName],
-        listenerIdx = 0
-      for (; listenerIdx < innerEvent.length; listenerIdx++) {
-        if (isRootNode) {
-          addListenerToElement(
-            nComponent.shadowRoot,
-            listenerName,
-            innerEvent[listenerIdx].bind(newComponent)
-          )
-        } else {
-          addListenerToElement(
-            nComponent,
-            listenerName,
-            innerEvent[listenerIdx].bind(newComponent)
-          )
+      let id = innerEventNameSlice[0]
+
+      if (id !== '') {
+        isRootNodeEvent = false
+
+        if (id !== 'this') {
+          nComponent = newComponent.$[id]
         }
       }
     }
+
+    if (nComponent) {
+      for (let callback of innerEvents[innerEventName]) {
+        addListenerToElement(
+          isRootNodeEvent ? nComponent.shadowRoot : nComponent,
+          eventName,
+          callback.bind(newComponent)
+        )
+      }
+    }
   }
-  Component._callLifeTimeFuncs(newComponent, 'created')
+
+  // 调用 created 生命周期方法
+  component._callLifeTimeFuncs(newComponent, 'created')
   return newComponent
 }
-Component.hasProperty = function (ele, propName) {
+
+/**
+ * 判断组件上是否有某个属性。
+ * @param {Element} ele
+ * @param {String} propName
+ * @return {Boolean}
+ **/
+component.hasProperty = function (ele, propName) {
   return undefined !== ele.__propPublic[propName]
 }
-Component.hasPublicProperty = function (ele, propName) {
-  return ele.__propPublic[propName] === !0
+
+/**
+ * 判断组件上是否有某个公共属性。
+ * @param {Element} ele
+ * @param {String} propName
+ * @return {Boolean}
+ **/
+component.hasPublicProperty = function (ele, propName) {
+  return ele.__propPublic[propName] === true
 }
-Component._callLifeTimeFuncs = function (ele, funcName) {
+
+/**
+ * 调用组件的某个生命周期方法。
+ * @param {Element} ele
+ * @param {String} funcName 生命周期方法名
+ **/
+component._callLifeTimeFuncs = function (ele, funcName) {
   let func = ele.__lifeTimeFuncs[funcName]
   func.call(ele, [])
 }
-Component.register({
+
+// 注册最基础的组件
+component.register({
   is: '',
   template: '<wx-content></wx-content>',
   properties: {}
 })
 
-export default Component
+export default component

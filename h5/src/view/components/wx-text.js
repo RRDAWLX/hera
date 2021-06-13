@@ -47,21 +47,21 @@ export default window.exparser.registerElement({
 
     return this.decode
       ? txt
-          .replace(/&nbsp;/g, ' ')
-          .replace(/&ensp;/g, ' ')
-          .replace(/&emsp;/g, ' ')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&quot;/g, '"')
-          .replace(/&apos;/g, "'")
-          .replace(/&amp;/g, '&')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&ensp;/g, ' ')
+        .replace(/&emsp;/g, ' ')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&amp;/g, '&')
       : txt
   },
   _update: function () {
-    var rawEle = this.$.raw,
-      fragment = document.createDocumentFragment(),
-      idx = 0,
-      len = rawEle.childNodes.length
+    var rawEle = this.$.raw
+    var fragment = document.createDocumentFragment()
+    var idx = 0
+    var len = rawEle.childNodes.length
     for (; idx < len; idx++) {
       var childNode = rawEle.childNodes.item(idx)
       if (childNode.nodeType === childNode.TEXT_NODE) {

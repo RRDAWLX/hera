@@ -21,10 +21,10 @@ window.exparser.registerElement({
   inserted: !1,
   attached: function () {
     try {
-      if (this.inserted) return void console.warn('一个页面只能插入一个 `wx-web-view`。')
+      if (this.inserted) { return void console.warn('一个页面只能插入一个 `wx-web-view`。') }
       this.uuid = this.getPositioningId()
-      var t = this,
-        n = this.uuid
+      var t = this
+      var n = this.uuid
       // wx.getSystemInfo({
       //   success: function (e) {
       // t.$$.style.width = e.windowWidth + 'px'
@@ -44,7 +44,7 @@ window.exparser.registerElement({
           }
         },
         function (e) {
-          ;/ok/.test(e.errMsg) && t._ready()
+          /ok/.test(e.errMsg) && t._ready()
         }
       )
     } catch (e) {

@@ -1,57 +1,90 @@
-import BoundProps from './BoundProps'
-import calculate from './TemplateExparser'
-import element from './Element'
-import initialize from './SlotNode'
-import VirtualNode from './VirtualNode'
-import TextNode from './TextNode'
+/**
+ * @module
+ */
 
-const dollarSign = String.fromCharCode(36)
+import globalOptions from './global-options'
+import BoundProps from './bound-props'
+import TemplateExparser from './template-exparser'
+import Element from './element'
+import SlotNode from './slot-node'
+import VirtualNode from './virtual-node'
+import TextNode from './text-node'
 
+const dollarSign = String.fromCharCode(36) // $
+
+// 'a-bc-d' => aBcD
 function dashToCamel (txt) {
   return txt.replace(/-([a-z])/g, function (match, p1) {
     return p1.toUpperCase()
   })
 }
 
-const Instance = function () {}
-Instance.prototype = Object.create(Object.prototype, {
-  constructor: {
-    value: Instance,
-    writable: true,
-    configurable: true
-  }
-})
+/**
+ * 属性
+ * @typedef Attribute
+ * @type {Object}
+ * @property {String} name 属性名
+ * @property {*} value 属性值
+ **/
 
+/**
+ * 基于 attributes 生成属性对象。
+ * @param {Arribute[]} attributes
+ * @return {Object}
+ * @example
+ * getAttributes([{ name: 'num', value: 1 }]) => { num: 1 }
+ **/
 function getAttributes (attributes) {
   let tempObj = Object.create(null)
   let idx = 0
+
   for (; idx < attributes.length; idx++) {
     tempObj[attributes[idx].name] = attributes[idx].value
   }
+
   return tempObj
 }
 
-const setObjAttr = function (obj, key, value) {
+function setObjAttr (obj, key, value) {
   obj[key] = value
 }
 
-function domRendering (nodes, shadowRoot, idMap, slots, binding) {//把nodes追加到shadowRoot下
-  let newNode = null, attrIdx = 0, attr = null, rootIdx = 0
+/**
+ * 把nodes追加到shadowRoot下???
+ * @param {Element[]} nodes
+ * @param {Element} shadowRoot
+ * @param {Unknown} idMap
+ * @param {Unknown} slots
+ * @param {Unknown} binding
+ **/
+function domRendering (nodes, shadowRoot, idMap, slots, binding) {
+  // 把nodes追加到shadowRoot下
+  let newNode = null
+  let attrIdx = 0
+  let attr = null
+  let rootIdx = 0
+
   for (; rootIdx < nodes.length; rootIdx++) {
     let node = nodes[rootIdx]
+
     if (node.name === undefined) {
-      newNode = TextNode.create(node.text)
-      node.exp && binding.add(node.exp, newNode.__domElement, 'textContent', setObjAttr)
-      element.appendChild(shadowRoot, newNode)
+      // 文本节点
+      newNode = new TextNode(node.text)
+      node.exp &&
+        binding.add(node.exp, newNode.__domElement, 'textContent', setObjAttr)
+      Element.appendChild(shadowRoot, newNode)
     } else {
       let attributes = node.attrs
+
       if (node.name === 'virtual') {
         newNode = VirtualNode.create(node.virtual)
       } else if (node.custom) {
-        newNode = componentSystem.create(node.name)
+        newNode = component.create(node.name)
         attrIdx = 0
+
         for (; attrIdx < attributes.length; attrIdx++) {
           attr = attributes[attrIdx]
+
           if (attr.updater) {
             attr.updater(newNode, attr.name, attr.value)
           } else {
@@ -61,17 +94,20 @@ function domRendering (nodes, shadowRoot, idMap, slots, binding) {//把nodes追�
               newNode[attr.name] = attr.value
             }
           }
+
           attr.exp && binding.add(attr.exp, newNode, attr.name, attr.updater)
         }
       } else {
-        newNode = initialize.wrap(document.importNode(node.prerendered, !1))//以real dom创建Vnode
+        newNode = new SlotNode(document.importNode(node.prerendered, false)) // 以real dom创建Vnode
         attrIdx = 0
+
         for (; attrIdx < attributes.length; attrIdx++) {
           attr = attributes[attrIdx]
           binding.add(attr.exp, newNode.__domElement, attr.name, attr.updater)
         }
       }
-      element.appendChild(shadowRoot, newNode)
+
+      Element.appendChild(shadowRoot, newNode)
       node.id && (idMap[node.id] = newNode)
       node.slot !== undefined && (slots[node.slot] = newNode)
       domRendering(node.children, newNode, idMap, slots, binding)
@@ -79,22 +115,39 @@ function domRendering (nodes, shadowRoot, idMap, slots, binding) {//把nodes追�
   }
 }
 
+/**
+ * 把nodes追加到shadowRoot下???
+ * @param {Element[]} nodes
+ * @param {Element} shadowRoot
+ * @param {Unknown} idMap
+ * @param {Unknown} slots
+ * @param {Unknown} binding
+ **/
 function nativeRendering (nodes, shadowRoot, idMap, slots, binding) {
-  let tempNode = null, attrIdx = 0, attr = null, idx = 0
+  let tempNode = null
+  let attrIdx = 0
+  let attr = null
+  let idx = 0
+
   for (; idx < nodes.length; idx++) {
     let nodeItem = nodes[idx]
+
     if (void 0 === nodeItem.name) {
       tempNode = document.createTextNode(nodeItem.text)
-      nodeItem.exp && binding.add(nodeItem.exp, tempNode, 'textContent', setObjAttr)
+      nodeItem.exp &&
+        binding.add(nodeItem.exp, tempNode, 'textContent', setObjAttr)
       shadowRoot.appendChild(tempNode)
     } else {
       let attributes = nodeItem.attrs
+      // 浅复制
       tempNode = document.importNode(nodeItem.prerendered, false)
       attrIdx = 0
+
       for (; attrIdx < attributes.length; attrIdx++) {
         attr = attributes[attrIdx]
         binding.add(attr.exp, tempNode, attr.name, attr.updater)
       }
+
       shadowRoot.appendChild(tempNode)
       nodeItem.id && (idMap[nodeItem.id] = tempNode)
       undefined !== nodeItem.slot && (slots[nodeItem.slot] = tempNode)
@@ -103,40 +156,21 @@ function nativeRendering (nodes, shadowRoot, idMap, slots, binding) {
   }
 }
 
-const Template = function () {}
-Template.prototype = Object.create(Object.prototype, {
-  constructor: {
-    value: Template,
-    writable: true,
-    configurable: true
-  }
-})
-
-let componentSystem = null
-Template._setCompnentSystem = function (obj) {
-  componentSystem = obj
-}
-
-let globalOptions = function () {
-  return {
-    renderingMode: 'native',
-    keepWhiteSpace: false,
-    parseTextContent: false
-  }
-}
-Template._setGlobalOptionsGetter = function (opt) {
-  globalOptions = opt
-}
-
-const toggleDomClassAttr = function (ele, classname, force) {
+/**
+ * 切换 dom 元素的类
+ * @param {Element} ele
+ * @param {String} classname
+ * @param {Boolean} force 如果为 true，则强制加上类；如果为 false，则强制删除类。
+ **/
+function toggleDomClassAttr (ele, classname, force) {
   ele.__domElement.classList.toggle(classname, !!force)
 }
 
-const setDomStyle = function (ele, attr, value) {
+function setDomStyle (ele, attr, value) {
   ele.__domElement.style[attr] = value
 }
 
-const setAttr = function (ele, attr, value) {
+function setAttr (ele, attr, value) {
   if (value === !0) {
     ele.setAttribute(attr, '')
   } else {
@@ -148,11 +182,11 @@ const setAttr = function (ele, attr, value) {
   }
 }
 
-const toggleClassAttr = function (ele, classname, force) {
+function toggleClassAttr (ele, classname, force) {
   ele.classList.toggle(classname, !!force)
 }
 
-const setStyle = function (ele, attr, value) {
+function setStyle (ele, attr, value) {
   ele.style[attr] = value
 }
 
@@ -171,168 +205,296 @@ let virtual = {
   children: []
 }
 
-// create(insElement, defaultValuesJSON, componentBehavior.methods, opts)
-Template.create = function (ele, data, behaviorMethods, opts) {//opts:Element.options ele：dom
-  let globOpt = globalOptions()
-  let renderingMode = opts.renderingMode || globOpt.renderingMode
-  let slotRef = slot
-  if (renderingMode === 'native') {
-    slotRef = virtual
+class Instance {
+  /**
+   * @type {Object}
+   */
+  idMap = Object.create(null)
+
+  /**
+   * @type {Object}
+   */
+  slots = Object.create(null)
+
+  /**
+   * @type {BoundProps}
+   */
+  _binding = new BoundProps()
+
+  /**
+   * @type {?(DocumentFragment|VirtualNode)}
+   */
+  shadowRoot = null
+
+  /**
+   *
+   * @param {Element} ele
+   * @param {Object} propData
+   * @param {String} propKey
+   **/
+  updateValues (ele, propData, propKey) {
+    propKey && this._binding.update(ele, propData, propKey)
   }
-  //确定配置项
-  let eleAttributes = getAttributes(ele.attributes)
-  let textParseOpt = {
-    parseTextContent: undefined !== eleAttributes['parse-text-content'] || opts.parseTextContent || globOpt.parseTextContent,
-    keepWhiteSpace: undefined !== eleAttributes['keep-white-space'] || opts.keepWhiteSpace || globOpt.keepWhiteSpace
+}
+
+// component 模块的引用
+let component = null
+
+class Template {
+  /**
+   * 注册 component 模块，避免循环引用。
+   * @param {Object} c component 模块
+   **/
+  static setCompnentSystem (c) {
+    component = c
   }
 
-  let content = ele.content
-  if (ele.tagName !== 'TEMPLATE') {
-    content = document.createDocumentFragment()
-    for (; ele.childNodes.length;) {
-      content.appendChild(ele.childNodes[0])
+  /**
+   *
+   * @type {Object[]}
+   **/
+  _tagTreeRoot = []
+
+  /**
+   * @type {String}
+   **/
+  _renderingMode
+
+  /**
+   * @param {Object} ele
+   * @param {String} ele.tagName
+   * @param {Object.<String, *>} ele.attributes
+   * @param {Object[]} ele.content 子节点列表
+   * @param {Element[]} ele.childNodes
+   * @param {Object} data
+   * @param {Object.<String, Function>} behaviorMethods
+   * @param {Object} opts
+   * @param {String} opts.renderingMode
+   * @param {Boolean} opts.parseTextContent
+   * @param {Boolean} opts.keepWhiteSpace
+   **/
+  constructor (ele, data, behaviorMethods, opts) {
+    let renderingMode = (this._renderingMode =
+      opts.renderingMode || globalOptions.renderingMode)
+    let slotRef = renderingMode === 'native' ? virtual : slot
+    // 确定配置项
+    let eleAttributes = getAttributes(ele.attributes)
+    let textParseOpt = {
+      parseTextContent:
+        undefined !== eleAttributes['parse-text-content'] ||
+        opts.parseTextContent ||
+        globalOptions.parseTextContent,
+      keepWhiteSpace:
+        undefined !== eleAttributes['keep-white-space'] ||
+        opts.keepWhiteSpace ||
+        globalOptions.keepWhiteSpace
     }
-  }
+    let content = ele.content
 
-  let isSlotPused = false
+    if (ele.tagName !== 'TEMPLATE') {
+      content = document.createDocumentFragment()
 
-  const childNodeFn = function (tagTree, contentChildNodes, tempArr, textParseOpt) {
-    let exp, nodeIdx = 0
-    for (; nodeIdx < contentChildNodes.length; nodeIdx++) {
-      let nodeItem = contentChildNodes[nodeIdx]
-      let treeLengthList = tempArr.concat(tagTree.length)
-      if (nodeItem.nodeType !== 8) { // if not Node.COMMENT_NODE
-        if (nodeItem.nodeType !== 3) { // if not Node.TEXT_NODE
-          if (nodeItem.tagName !== 'WX-CONTENT' && nodeItem.tagName !== 'SLOT') {//不是占位标签
-            let isCustomEle = nodeItem.tagName.indexOf('-') >= 0 && renderingMode !== 'native'
-            let prerendered = null
-            isCustomEle || (prerendered = document.createElement(nodeItem.tagName))
-            let id = ''
-            let nodeItemAttributes = nodeItem.attributes
-            let attrs = []
-            if (nodeItemAttributes) {
-              let pareOpts = {}, attrIdx = 0
-              for (; attrIdx < nodeItemAttributes.length; attrIdx++) {
-                let nodeItemAttr = nodeItemAttributes[attrIdx]
-                if (nodeItemAttr.name === 'id') {
-                  id = nodeItemAttr.value
-                } else if (nodeItemAttr.name === 'parse-text-content') {
-                  pareOpts.parseTextContent = true
-                } else if (nodeItemAttr.name === 'keep-white-space') {
-                  pareOpts.keepWhiteSpace = true
-                } else {
-                  exp = undefined
-                  let attrSetter
-                  let attrName = nodeItemAttr.name
+      while (ele.childNodes.length) {
+        content.appendChild(ele.childNodes[0])
+      }
+    }
 
-                  if (nodeItemAttr.name.slice(-1) === dollarSign) {//属性名末尾是$
-                    if (isCustomEle) {
+    let isSlotPused = false
+
+    const childNodeFn = function (
+      tagTree,
+      contentChildNodes,
+      tempArr,
+      textParseOpt
+    ) {
+      for (let nodeItem of contentChildNodes) {
+        let treeLengthList = tempArr.concat(tagTree.length)
+
+        // if not Node.COMMENT_NODE
+        if (nodeItem.nodeType !== 8) {
+          // if not Node.TEXT_NODE
+          if (nodeItem.nodeType !== 3) {
+            // 不是占位标签
+            if (
+              nodeItem.tagName !== 'WX-CONTENT' &&
+              nodeItem.tagName !== 'SLOT'
+            ) {
+              let isCustomEle =
+                nodeItem.tagName.indexOf('-') >= 0 && renderingMode !== 'native'
+              let prerendered = isCustomEle
+                ? null
+                : document.createElement(nodeItem.tagName)
+              let id = ''
+              let nodeItemAttributes = nodeItem.attributes
+              let attrs = []
+
+              if (nodeItemAttributes) {
+                let parseOpts = {}
+
+                for (let nodeItemAttr of nodeItemAttributes) {
+                  if (nodeItemAttr.name === 'id') {
+                    id = nodeItemAttr.value
+                  } else if (nodeItemAttr.name === 'parse-text-content') {
+                    parseOpts.parseTextContent = true
+                  } else if (nodeItemAttr.name === 'keep-white-space') {
+                    parseOpts.keepWhiteSpace = true
+                  } else {
+                    let attrSetter
+                    let attrName = nodeItemAttr.name
+
+                    // 属性名末尾是$
+                    if (nodeItemAttr.name.slice(-1) === dollarSign) {
+                      if (isCustomEle) {
+                        attrSetter = setObjAttr
+                        attrName = dashToCamel(nodeItemAttr.name.slice(0, -1))
+                      } else {
+                        // dom
+                        attrSetter = setAttr
+                        attrName = nodeItemAttr.name.slice(0, -1)
+                      }
+                    } else if (nodeItemAttr.name.slice(-1) === ':') {
                       attrSetter = setObjAttr
                       attrName = dashToCamel(nodeItemAttr.name.slice(0, -1))
-                    } else { // dom
-                      attrSetter = setAttr
-                      attrName = nodeItemAttr.name.slice(0, -1)
+                    } else if (nodeItemAttr.name.slice(0, 6) === 'class.') {
+                      attrSetter = isCustomEle
+                        ? toggleDomClassAttr
+                        : toggleClassAttr
+                      attrName = nodeItemAttr.name.slice(6)
+                    } else if (nodeItemAttr.name.slice(0, 6) === 'style.') {
+                      attrSetter = isCustomEle ? setDomStyle : setStyle
+                      attrName = nodeItemAttr.name.slice(6)
                     }
-                  } else {
-                    if (nodeItemAttr.name.slice(-1) === ':') {
-                      attrSetter = setObjAttr//整理后isCustomEle ? setAttr : setObjAttr 这是有误的
-                      attrName = dashToCamel(nodeItemAttr.name.slice(0, -1))
-                    } else {
-                      if (nodeItemAttr.name.slice(0, 6) === 'class.') {
-                        attrSetter = isCustomEle ? toggleDomClassAttr : toggleClassAttr
-                        attrName = nodeItemAttr.name.slice(6)
-                      } else {
-                        if (nodeItemAttr.name.slice(0, 6) === 'style.') {
-                          attrSetter = isCustomEle ? setDomStyle : setStyle
-                          attrName = nodeItemAttr.name.slice(6)
-                        }
-                      }
+
+                    let exp
+
+                    if (attrSetter) {
+                      exp = new TemplateExparser(
+                        nodeItemAttr.value,
+                        behaviorMethods
+                      )
+                    }
+
+                    let value = exp
+                      ? exp.calculate(null, data)
+                      : nodeItemAttr.value
+
+                    if (!isCustomEle) {
+                      (attrSetter || setAttr)(prerendered, attrName, value)
+                    }
+
+                    if (isCustomEle || exp) {
+                      attrs.push({
+                        name: attrName,
+                        value,
+                        updater: attrSetter,
+                        exp
+                      })
                     }
                   }
-                  attrSetter && (exp = calculate.parse(nodeItemAttr.value, behaviorMethods))
-                  let value = exp ? exp.calculate(null, data) : nodeItemAttr.value
-                  isCustomEle || (attrSetter || setAttr)(prerendered, attrName, value);
-                  (isCustomEle || exp) && attrs.push({//isCustomEle 为后面设置属性用
-                    name: attrName,
-                    value: value,
-                    updater: attrSetter,
-                    exp: exp
-                  })
+                }
+
+                let elementNode = {
+                  name: nodeItem.tagName.toLowerCase(),
+                  id,
+                  custom: isCustomEle,
+                  attrs,
+                  prerendered,
+                  children: []
+                }
+                tagTree.push(elementNode)
+
+                if (nodeItem.tagName === 'VIRTUAL') {
+                  elementNode.virtual = 'virtual'
+                }
+
+                if (nodeItem.childNodes) {
+                  childNodeFn(
+                    elementNode.children,
+                    nodeItem.childNodes,
+                    treeLengthList,
+                    parseOpts
+                  )
+                }
+
+                if (
+                  elementNode.children.length === 1 &&
+                  elementNode.children[0] === slotRef
+                ) {
+                  elementNode.children.pop()
+                  elementNode.slot = ''
                 }
               }
-
-              let elementNode = {
-                name: nodeItem.tagName.toLowerCase(),
-                id: id,
-                custom: isCustomEle,
-                attrs: attrs,
-                prerendered: prerendered,
-                children: []
-              }
-              tagTree.push(elementNode)
-              nodeItem.tagName === 'VIRTUAL' && (elementNode.virtual = 'virtual')
-              nodeItem.childNodes && childNodeFn(elementNode.children, nodeItem.childNodes, treeLengthList, pareOpts)
-              if (elementNode.children.length === 1 && elementNode.children[0] === slotRef) {
-                elementNode.children.pop()
-                elementNode.slot = ''
-              }
+            } else {
+              isSlotPused = true
+              tagTree.push(slotRef)
             }
           } else {
-            isSlotPused = true
-            tagTree.push(slotRef)
+            let text = nodeItem.textContent
+
+            if (!textParseOpt.keepWhiteSpace) {
+              text = text.trim()
+
+              if (text === '') continue
+
+              nodeItem.textContent = text
+            }
+
+            let exp = textParseOpt.parseTextContent
+              ? new TemplateExparser(text, behaviorMethods)
+              : null
+
+            tagTree.push({
+              exp,
+              text: exp ? exp.calculate(null, data) : text
+            })
           }
-        } else {
-          let text = nodeItem.textContent
-          if (!textParseOpt.keepWhiteSpace) {
-            text = text.trim()
-            if (text === '') continue
-            nodeItem.textContent = text
-          }
-          exp = undefined
-          textParseOpt.parseTextContent && (exp = calculate.parse(text, behaviorMethods))
-          tagTree.push({
-            exp: exp,
-            text: exp ? exp.calculate(null, data) : text
-          })
         }
       }
     }
+
+    let tagTree = this._tagTreeRoot
+    childNodeFn(tagTree, content.childNodes, [], textParseOpt)
+
+    if (!isSlotPused) {
+      tagTree.push(slotRef)
+    }
+
+    if (tagTree.length === 1 && tagTree[0] === slotRef) {
+      tagTree.pop()
+    }
   }
 
-  let tagTree = []
-  childNodeFn(tagTree, content.childNodes, [], textParseOpt)
-  isSlotPused || tagTree.push(slotRef)
-  tagTree.length === 1 && tagTree[0] === slotRef && tagTree.pop()
-  let tempTemplate = Object.create(Template.prototype)
-  tempTemplate._tagTreeRoot = tagTree
-  tempTemplate._renderingMode = renderingMode
-  return tempTemplate
-}
+  /**
+   * 创建一个 Instance 实例。
+   * @return {Instance}
+   **/
+  createInstance () {
+    let ins = new Instance()
+    let shadowRoot
 
-Template.prototype.createInstance = function () {
-  let ins = Object.create(Instance.prototype)
-  let idMap = Object.create(null)
-  let slots = Object.create(null)
-  let _binding = BoundProps.create()
-  let shadowRoot = document.createDocumentFragment()
+    if (this._renderingMode === 'native') {
+      shadowRoot = document.createDocumentFragment()
+      nativeRendering(
+        this._tagTreeRoot,
+        shadowRoot,
+        ins.idMap,
+        ins.slots,
+        ins._binding
+      )
+    } else {
+      shadowRoot = new VirtualNode('shadow-root')
+      domRendering(
+        this._tagTreeRoot,
+        shadowRoot,
+        ins.idMap,
+        ins.slots,
+        ins._binding
+      )
+    }
 
-  if (this._renderingMode === 'native') {
-    // console.log(this._tagTreeRoot, shadowRoot, idMap, slots, _binding)
-    nativeRendering(this._tagTreeRoot, shadowRoot, idMap, slots, _binding)
-  } else {
-    shadowRoot = VirtualNode.create('shadow-root')
-    domRendering(this._tagTreeRoot, shadowRoot, idMap, slots, _binding)
+    ins.shadowRoot = shadowRoot
+    return ins
   }
-
-  ins.shadowRoot = shadowRoot
-  ins.idMap = idMap
-  ins.slots = slots
-  ins._binding = _binding
-  return ins
-}
-
-Instance.prototype.updateValues = function (ele, propData, propKey) {
-  propKey && this._binding.update(ele, propData, propKey)
 }
 
 export default Template

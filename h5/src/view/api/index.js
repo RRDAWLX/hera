@@ -1,174 +1,126 @@
+// TODO: INVOKE_METHOD 事件的参数为 name，args；
+// PAGE_EVENT 事件的参数位 eventName，data。应该可以保持一致，待优化。
+
+import reporter from '@/common/reporter'
+import platform from '@/common/platform'
 import bridge from './bridge'
-import contactButton from './contactButton'
-import onAppStateChange from './onAppStateChange'
-import utils from './utils'
+import contactButton from './contact-button'
+import appState from './app-state'
+import { animationToStyle } from './style'
 import './init'
+import { getLocalImgData } from './image'
+import route from './route'
+import version from './version'
 
-function injectAttr (attrName) {
-  isInDevtools
-    ? (wdApi[attrName] = apiObj[attrName])
-    : wdApi.__defineGetter__(attrName, function () {
-      return function () {
-        try {
-          return apiObj[attrName].apply(this, arguments)
-        } catch (e) {
-          errReport(e)
-        }
-      }
-    })
+/**
+ * 发布 INVOKE_METHOD 事件。
+ * @param {String} name 要调用的方法名称
+ * @param {Object} args 调用参数。
+ * @private
+ **/
+function publishInvokeMethod (name, args) {
+  bridge.publish('INVOKE_METHOD', { name, args })
 }
 
-function errReport (obj, extend) {
-  if (Object.prototype.toString.apply(obj) === '[object Error]') {
-    if (obj.type == 'WebviewSdkKnownError') throw obj
-    Reporter.errorReport({
-      key: 'webviewSDKScriptError',
-      error: obj,
-      extend: extend
-    })
-  }
-}
+// TODO: 接口文档待完善
+let apiObj = {
+  invoke: bridge.invoke,
+  on: bridge.on,
+  getPlatform: platform.getPlatform,
 
-var localImgDataIng = !1,
-  imgData = [],
-  wdApi = {},
-  isInDevtools = utils.getPlatform() === 'devtools',
-  defInvoke = function (name, args) {
-    // publish
-    bridge.publish('INVOKE_METHOD', {
-      name: name,
-      args: args
-    })
+  ...appState,
+  ...contactButton,
+  ...route,
+  getLocalImgData,
+  animationToStyle,
+
+  initReady: function () {
+    bridge.invokeMethod('initReady')
   },
-  apiObj = {
-    invoke: bridge.invoke,
-    on: bridge.on,
-    getPlatform: utils.getPlatform,
-    onAppEnterForeground: onAppStateChange.onAppEnterForeground,
-    onAppEnterBackground: onAppStateChange.onAppEnterBackground,
-    reportIDKey: function (e, t) {
-      console.warn('reportIDKey has been removed wd')
-    },
-    reportKeyValue: function (e, t) {
-      console.warn('reportKeyValue has been removed from wd')
-    },
-    initReady: function () {
-      bridge.invokeMethod('initReady')
-    },
-    redirectTo: function (params) {
-      defInvoke('redirectTo', params)
-    },
-    navigateTo: function (params) {
-      defInvoke('navigateTo', params)
-    },
-    reLaunch: function (params) {
-      defInvoke('reLaunch', params)
-    },
-    switchTab: function (params) {
-      defInvoke('switchTab', params)
-    },
-    clearStorage: function () {
-      defInvoke('clearStorage', {})
-    },
-    showKeyboard: function (params) {
-      bridge.invokeMethod('showKeyboard', params)
-    },
-    showDatePickerView: function (params) {
-      bridge.invokeMethod('showDatePickerView', params)
-    },
-    hideKeyboard: function (params) {
-      bridge.invokeMethod('hideKeyboard', params)
-    },
-    insertMap: function (params) {
-      bridge.invokeMethod('insertMap', params)
-    },
-    removeMap: function (params) {
-      bridge.invokeMethod('removeMap', params)
-    },
-    updateMapCovers: function (params) {
-      bridge.invokeMethod('updateMapCovers', params)
-    },
-    insertContactButton: contactButton.insertContactButton,
-    updateContactButton: contactButton.updateContactButton,
-    removeContactButton: contactButton.removeContactButton,
-    enterContact: contactButton.enterContact,
-    getRealRoute: utils.getRealRoute,
-    getCurrentRoute: function (params) {
-      bridge.invokeMethod('getCurrentRoute', params, {
-        beforeSuccess: function (res) {
-          res.route = res.route.split('?')[0]
-        }
-      })
-    },
-    getLocalImgData: function (params) {
-      function beforeAllFn () {
-        localImgDataIng = !1
-        if (imgData.length > 0) {
-          var item = imgData.shift()
-          apiObj.getLocalImgData(item)
-        }
-      }
-
-      if (localImgDataIng === !1) {
-        localImgDataIng = !0
-        if (typeof params.path === 'string') {
-          apiObj.getCurrentRoute({
-            success: function (res) {
-              var route = res.route
-              params.path = utils.getRealRoute(
-                route || 'index.html',
-                params.path
-              )
-              bridge.invokeMethod('getLocalImgData', params, {
-                beforeAll: beforeAllFn
-              })
-            }
-          })
-        } else {
-          bridge.invokeMethod('getLocalImgData', params, {
-            beforeAll: beforeAllFn
-          })
-        }
-      } else {
-        imgData.push(params)
-      }
-    },
-    insertVideoPlayer: function (e) {
-      bridge.invokeMethod('insertVideoPlayer', e)
-    },
-    removeVideoPlayer: function (e) {
-      bridge.invokeMethod('removeVideoPlayer', e)
-    },
-    insertShareButton: function (e) {
-      bridge.invokeMethod('insertShareButton', e)
-    },
-    updateShareButton: function (e) {
-      bridge.invokeMethod('updateShareButton', e)
-    },
-    removeShareButton: function (e) {
-      bridge.invokeMethod('removeShareButton', e)
-    },
-    onAppDataChange: function (callback) {
-      bridge.subscribe('appDataChange', function (params) {
-        callback(params)
-      })
-    },
-    onPageScrollTo: function (callback) {
-      bridge.subscribe('pageScrollTo', function (params) {
-        callback(params)
-      })
-    },
-    publishPageEvent: function (eventName, data) {
-      bridge.publish('PAGE_EVENT', {
-        eventName: eventName,
-        data: data
-      })
-    },
-    animationToStyle: utils.animationToStyle
+  redirectTo: function (params) {
+    publishInvokeMethod('redirectTo', params)
+  },
+  navigateTo: function (params) {
+    publishInvokeMethod('navigateTo', params)
+  },
+  reLaunch: function (params) {
+    publishInvokeMethod('reLaunch', params)
+  },
+  switchTab: function (params) {
+    publishInvokeMethod('switchTab', params)
+  },
+  clearStorage: function () {
+    publishInvokeMethod('clearStorage', {})
+  },
+  showKeyboard: function (params) {
+    bridge.invokeMethod('showKeyboard', params)
+  },
+  showDatePickerView: function (params) {
+    bridge.invokeMethod('showDatePickerView', params)
+  },
+  hideKeyboard: function (params) {
+    bridge.invokeMethod('hideKeyboard', params)
+  },
+  insertMap: function (params) {
+    bridge.invokeMethod('insertMap', params)
+  },
+  removeMap: function (params) {
+    bridge.invokeMethod('removeMap', params)
+  },
+  updateMapCovers: function (params) {
+    bridge.invokeMethod('updateMapCovers', params)
+  },
+  insertVideoPlayer: function (e) {
+    bridge.invokeMethod('insertVideoPlayer', e)
+  },
+  removeVideoPlayer: function (e) {
+    bridge.invokeMethod('removeVideoPlayer', e)
+  },
+  insertShareButton: function (e) {
+    bridge.invokeMethod('insertShareButton', e)
+  },
+  updateShareButton: function (e) {
+    bridge.invokeMethod('updateShareButton', e)
+  },
+  removeShareButton: function (e) {
+    bridge.invokeMethod('removeShareButton', e)
+  },
+  onAppDataChange: function (callback) {
+    bridge.subscribe('appDataChange', callback)
+  },
+  onPageScrollTo: function (callback) {
+    bridge.subscribe('pageScrollTo', callback)
+  },
+  publishPageEvent: function (eventName, data) {
+    bridge.publish('PAGE_EVENT', { eventName, data })
   }
+}
 
-for (var key in apiObj) injectAttr(key)
+let exportApi = { version }
+// 将 apiObj 上的所有方法进行封装，然后添加到 exportApi 上
+Object.entries(apiObj).forEach(([key, fn]) => {
+  if (platform.isDevtools()) {
+    exportApi[key] = fn
+  } else {
+    exportApi[key] = function (...args) {
+      try {
+        return fn.apply(this, args)
+      } catch (error) {
+        reporter.errorReport({
+          key: 'webviewSDKScriptError',
+          error
+        })
+      }
+    }
+  }
+})
 
-// export default wdApi
-module.exports = wdApi
-window.wd = wdApi
+/**
+ * 在全局对象上挂载 exportApi。
+ * @module
+ */
+/** @global */
+window.wd = exportApi
+export default {
+  ...exportApi
+}

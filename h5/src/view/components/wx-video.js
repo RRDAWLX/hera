@@ -185,19 +185,19 @@ if (wd.getPlatform() !== 'ios') {
     },
     actionChanged: function (action, t) {
       if (typeof action === 'object') {
-        var method = action.method,
-          data = action.data
+        var method = action.method
+        var data = action.data
         if (method === 'play') {
           this.$.player.play()
         } else if (method === 'pause') {
           this.$.player.pause()
         } else if (method === 'seek') {
-          ;(this.$.player.currentTime = data[0]), this._resetDanmu()
+          (this.$.player.currentTime = data[0]), this._resetDanmu()
         } else if (method === 'sendDanmu') {
-          var danmuInfo = _slicedToArray(data, 2),
-            txt = danmuInfo[0],
-            color = danmuInfo[1],
-            currentTime = parseInt(this.$.player.currentTime)
+          var danmuInfo = _slicedToArray(data, 2)
+          var txt = danmuInfo[0]
+          var color = danmuInfo[1]
+          var currentTime = parseInt(this.$.player.currentTime)
           this.danmuObject[currentTime]
             ? this.danmuObject[currentTime].push({
               text: txt,
@@ -239,9 +239,9 @@ if (wd.getPlatform() !== 'ios') {
     },
     onEnded: function (event) {},
     _computeRate: function (targetPos) {
-      var elapsed = this.$.progress.getBoundingClientRect().left,
-        totalLen = this.$.progress.offsetWidth,
-        rate = (targetPos - elapsed) / totalLen
+      var elapsed = this.$.progress.getBoundingClientRect().left
+      var totalLen = this.$.progress.offsetWidth
+      var rate = (targetPos - elapsed) / totalLen
       rate < 0 ? (rate = 0) : rate > 1 && (rate = 1)
       return rate
     },
@@ -506,8 +506,8 @@ if (wd.getPlatform() === 'ios') {
     },
     _update: function () {
       var opt =
-          arguments.length <= 0 || void 0 === arguments[0] ? {} : arguments[0],
-        _this = this
+          arguments.length <= 0 || void 0 === arguments[0] ? {} : arguments[0]
+      var _this = this
       opt.videoPlayerId = this._videoId
       opt.hide = this.hidden
       var _data = this._getData()
@@ -519,7 +519,7 @@ if (wd.getPlatform() === 'ios') {
       opt.data = JSON.stringify(_data)
       this.duration > 0 && (opt.duration = this.duration)
       HeraJSBridge.invoke('updateVideoPlayer', opt, function (data) {
-        ;/ok/.test(data.errMsg) ||
+        /ok/.test(data.errMsg) ||
           _this._publish('error', {
             errMsg: data.errMsg
           })
@@ -561,8 +561,8 @@ if (wd.getPlatform() === 'ios') {
               {
                 poster: posterUrl
               },
-                '封面'
-              )
+              '封面'
+            )
             : (this.$.player.poster = posterUrl)
           return void 0
         } else {
@@ -583,15 +583,15 @@ if (wd.getPlatform() === 'ios') {
           })
         }
         if (this._isiOS()) {
-          ;/wdfile:\/\//.test(srcUrl) ||
+          /wdfile:\/\//.test(srcUrl) ||
           /http:\/\//.test(srcUrl) ||
           /https:\/\//.test(srcUrl)
             ? this._update(
               {
                 filePath: srcUrl
               },
-                '资源'
-              )
+              '资源'
+            )
             : this._publish('error', {
               errMsg: 'MEDIA_ERR_SRC_NOT_SUPPORTED'
             })
@@ -630,8 +630,8 @@ if (wd.getPlatform() === 'ios') {
       if (this._isiOS()) {
       } else {
         if (typeof action !== 'object') return
-        var method = action.method,
-          data = action.data
+        var method = action.method
+        var data = action.data
         if (method === 'play') {
           this.$.player.play()
         } else if (method === 'pause') {
@@ -640,10 +640,10 @@ if (wd.getPlatform() === 'ios') {
           this.$.player.currentTime = data[0]
           this._resetDanmu()
         } else if (method === 'sendDanmu') {
-          var danmuData = _slicedToArray(data, 2),
-            txt = danmuData[0],
-            color = danmuData[1],
-            time = parseInt(this.$.player.currentTime)
+          var danmuData = _slicedToArray(data, 2)
+          var txt = danmuData[0]
+          var color = danmuData[1]
+          var time = parseInt(this.$.player.currentTime)
           this.danmuObject[time]
             ? this.danmuObject[time].push({
               text: txt,
@@ -661,8 +661,8 @@ if (wd.getPlatform() === 'ios') {
       }
     },
     onPlay: function (e) {
-      var self = this,
-        danmuItems = document.querySelectorAll('.wx-video-danmu-item')
+      var self = this
+      var danmuItems = document.querySelectorAll('.wx-video-danmu-item')
       Array.prototype.forEach.apply(danmuItems, [
         function (danmuItem) {
           var transitionDuration =
@@ -689,9 +689,9 @@ if (wd.getPlatform() === 'ios') {
           danmuItem.style.left = getComputedStyle(danmuItem).left
         }
       ]),
-        wd.publishPageEvent(this.bindpause, {
-          type: 'pause'
-        })
+      wd.publishPageEvent(this.bindpause, {
+        type: 'pause'
+      })
     },
     onEnded: function (e) {
       wd.publishPageEvent(this.bindended, {
@@ -699,9 +699,9 @@ if (wd.getPlatform() === 'ios') {
       })
     },
     _computeRate: function (targetPos) {
-      var elapsed = this.$.progress.getBoundingClientRect().left,
-        totalTime = this.$.progress.offsetWidth,
-        rate = (targetPos - elapsed) / totalTime
+      var elapsed = this.$.progress.getBoundingClientRect().left
+      var totalTime = this.$.progress.offsetWidth
+      var rate = (targetPos - elapsed) / totalTime
       rate < 0 ? (rate = 0) : rate > 1 && (rate = 1)
       return rate
     },
@@ -733,8 +733,8 @@ if (wd.getPlatform() === 'ios') {
       return this.lastDanmuPosition
     },
     attached: function () {
-      var self2 = this,
-        self = this
+      var self2 = this
+      var self = this
       if (this._isiOS()) {
         this._box = this._getBox()
         var data = this._getData()
@@ -867,10 +867,10 @@ if (wd.getPlatform() === 'ios') {
           videoPlayerId: this._videoId,
           success: function (e) {}
         }),
-        HeraJSBridge.publish('videoPlayerRemoved', {
-          domId: this.id,
-          videoPlayerId: this.videoPlayerId
-        })
+      HeraJSBridge.publish('videoPlayerRemoved', {
+        domId: this.id,
+        videoPlayerId: this.videoPlayerId
+      })
     },
     onBallTouchStart: function () {
       var self = this
