@@ -1,1 +1,1 @@
- var __wxConfig__ = {{= _.config}}
+var __wxConfig__ = {{= _.config}} // eslint-disable-line

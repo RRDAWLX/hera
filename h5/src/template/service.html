@@ -10,9 +10,12 @@
     var global = {}
     {{= _.logMethods}}
   </script>
+  <!-- // 配置 -->
   <script src="script/service-config.js?v={{= _.version}}"></script>
   <script src="script/config.js?v={{= _.version}}" type="text/javascript"></script>
+  <!-- // 渲染层框架 -->
   <script src="../../../framework/script/service.js?v={{= _.version}}" type="text/javascript"></script>
+  <!-- // 渲染层数据打包 -->
   <script src="script/app-service.js?v={{= _.version}}"></script>
 </head>
 

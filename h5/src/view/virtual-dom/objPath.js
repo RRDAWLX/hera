@@ -1,5 +1,16 @@
+/**
+ * 对象属性访问路径工具模块。
+ * @module
+ **/
+
 import Utils from './Utils'
 
+/**
+ * 将路径字符串解析成路径片段。
+ * @param {String} path 路径
+ * @return {String[]} 路径片段数组
+ * @todo path格式的格式是怎样的，什么意义？
+ **/
 const parsePath = function (path) {
   let pathLen = path.length,
     strs = [],
@@ -8,8 +19,10 @@ const parsePath = function (path) {
     haveNumber = !1,
     inBracket = !1,
     index = 0
+
   for (; index < pathLen; index++) {
     let ch = path[index]
+
     if (ch === '\\') {
       if (index + 1 < pathLen) {
         if (
@@ -37,12 +50,14 @@ const parsePath = function (path) {
       if (strs.length === 0) {
         throw new Error('path can not start with []: ' + path)
       }
+
       inBracket = !0
       haveNumber = !1
     } else if (ch === ']') {
       if (!haveNumber) {
         throw new Error('must have number in []: ' + path)
       }
+
       inBracket = !1
       strs.push(numInBracket)
       numInBracket = 0
@@ -50,55 +65,74 @@ const parsePath = function (path) {
       if (ch < '0' || ch > '9') {
         throw new Error('only number 0-9 could inside []: ' + path)
       }
+
       haveNumber = !0
       numInBracket = 10 * numInBracket + ch.charCodeAt(0) - 48
     } else {
       tempstr += ch
     }
   }
+
   tempstr && strs.push(tempstr)
+
   if (strs.length === 0) {
     throw new Error('path can not be empty')
   }
+
   return strs
 }
 
-const getObjectByPath = function(obj, paths, spec) {
-    for (var tempObj = void 0, key = void 0, originObj = obj, changed = !1, idx = 0; idx < paths.length; idx++){
-        if(Number(paths[idx]) === paths[idx] && paths[idx] % 1 === 0){
-            if("Array" !== Utils.getDataType(originObj)){
-                if(spec && !changed){
-                    changed = !0;
-                    tempObj[key] = { __value__: [], __wxspec__: !0};
-                    originObj = tempObj[key].__value__;
-                }else{
-                    tempObj[key] = [];
-                    originObj = tempObj[key]
-                }
-            }
-        }else{
-            if("Object" !== Utils.getDataType(originObj)){
-                if(spec && !changed){
-                    changed = !0
-                    tempObj[key] = { __value__: {}, __wxspec__: !0}
-                    originObj = tempObj[key].__value__
-                }else{
-                    tempObj[key] = {}
-                    originObj = tempObj[key]
-                }
-            }
+/**
+ * todo
+ * @param {Object} obj 被访问对象？？？
+ * @param {Unknow} paths 属性访问路径？？？
+ * @param {Boolean} spec
+ **/
+const getObjectByPath = function (obj, paths, spec) {
+  for (
+    var tempObj = void 0, key = void 0, originObj = obj, changed = !1, idx = 0;
+    idx < paths.length;
+    idx++
+  ) {
+    if (Number(paths[idx]) === paths[idx] && paths[idx] % 1 === 0) {
+      if (Utils.getDataType(originObj) !== 'Array') {
+        if (spec && !changed) {
+          changed = !0
+          tempObj[key] = { __value__: [], __wxspec__: !0 }
+          originObj = tempObj[key].__value__
+        } else {
+          tempObj[key] = []
+          originObj = tempObj[key]
         }
-        key = paths[idx]
-        tempObj = originObj
-        originObj = originObj[paths[idx]]
-        originObj && originObj.__wxspec__ && (originObj = originObj.__value__, changed = !0)
+      }
+    } else {
+      if (Utils.getDataType(originObj) !== 'Object') {
+        if (spec && !changed) {
+          changed = !0
+          tempObj[key] = { __value__: {}, __wxspec__: !0 }
+          originObj = tempObj[key].__value__
+        } else {
+          tempObj[key] = {}
+          originObj = tempObj[key]
+        }
+      }
     }
-    return {
-        obj: tempObj,
-        key: key,
-        changed: changed
-    }
+
+    key = paths[idx]
+    tempObj = originObj
+    originObj = originObj[paths[idx]]
+    originObj &&
+      originObj.__wxspec__ &&
+      ((originObj = originObj.__value__), (changed = !0))
+  }
+
+  return {
+    obj: tempObj,
+    key: key,
+    changed: changed
+  }
 }
+
 export default {
   parsePath,
   getObjectByPath

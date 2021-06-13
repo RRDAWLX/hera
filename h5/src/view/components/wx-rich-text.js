@@ -17,49 +17,25 @@ let textParser = (function () {
     creator.create = function (t, n) {
       var i = Object.create(creator.prototype)
       i._cbs = n
-      var o = (i._stateTable = {}),
-        r = (i._stateRecTable = {}),
-        a = {},
-        s = {},
-        l = function (e, n, i, o, r) {
-          if (Object.prototype.hasOwnProperty.call(t, i)) {
-            if (r[i]) {
-              if (!r[i].overwrite) {
-                throw new Error(
-                  'State "' +
-                    e +
-                    '" has multiple possible rules on symbol "' +
-                    i +
-                    '".'
-                )
-              }
-            } else r[i] = n
-          } else if (i !== 'ALL' && i !== 'NULL' && i.length > 1) {
-            if (o[i]) {
-              if (!o[i].overwrite) {
-                throw new Error(
-                  'State "' +
-                    e +
-                    '" has multiple possible rules on symbol "' +
-                    i +
-                    '".'
-                )
-              }
-            } else {
-              for (var a = 0; a < i.length; a++) {
-                if (i[a + 1] === '-' && i[a + 2]) {
-                  for (
-                    var s = i.charCodeAt(a + 2), l = i.charCodeAt(a);
-                    l <= s;
-                    l++
-                  ) {
-                    o[String.fromCharCode(l)] = n
-                  }
-                  a += 2
-                } else o[i[a]] = n
-              }
+      var o = (i._stateTable = {})
+      var r = (i._stateRecTable = {})
+      var a = {}
+      var s = {}
+      var l = function (e, n, i, o, r) {
+        if (Object.prototype.hasOwnProperty.call(t, i)) {
+          if (r[i]) {
+            if (!r[i].overwrite) {
+              throw new Error(
+                'State "' +
+                  e +
+                  '" has multiple possible rules on symbol "' +
+                  i +
+                  '".'
+              )
             }
-          } else if (o[i]) {
+          } else r[i] = n
+        } else if (i !== 'ALL' && i !== 'NULL' && i.length > 1) {
+          if (o[i]) {
             if (!o[i].overwrite) {
               throw new Error(
                 'State "' +
@@ -69,9 +45,33 @@ let textParser = (function () {
                   '".'
               )
             }
-          } else o[i] = n
-        },
-        c = ''
+          } else {
+            for (var a = 0; a < i.length; a++) {
+              if (i[a + 1] === '-' && i[a + 2]) {
+                for (
+                  var s = i.charCodeAt(a + 2), l = i.charCodeAt(a);
+                  l <= s;
+                  l++
+                ) {
+                  o[String.fromCharCode(l)] = n
+                }
+                a += 2
+              } else o[i[a]] = n
+            }
+          }
+        } else if (o[i]) {
+          if (!o[i].overwrite) {
+            throw new Error(
+              'State "' +
+                e +
+                '" has multiple possible rules on symbol "' +
+                i +
+                '".'
+            )
+          }
+        } else o[i] = n
+      }
+      var c = ''
       for (c in t) {
         for (
           var d = t[c],
@@ -83,42 +83,42 @@ let textParser = (function () {
           A < d.length;
           A++
         ) {
-          var g = d[A],
-            _ = g.states[0]
+          var g = d[A]
+          var _ = g.states[0]
           _ === c ? ((_ = g.states[1]), l(c, g, _, h, f)) : l(c, g, _, u, p)
         }
       }
-      var v = null,
-        w = function e (t, n, i) {
-          if (v[t] !== 2) {
-            if (v[t] === 1) {
-              throw new Error(
-                'State "' + t + '" has illegal recursive rule definition.'
-              )
-            }
-            v[t] = 1
-            var r = n[t],
-              a = i[t]
-            for (var s in r) {
-              e(s, n, i)
-              var l = o[s]
-              for (var c in l) {
-                if (a[c]) {
-                  if (!a[c].overwrite) {
-                    throw new Error(
-                      'State "' +
-                        t +
-                        '" has multiple possible rules on symbol "' +
-                        c +
-                        '".'
-                    )
-                  }
-                } else a[c] = r[s]
-              }
-            }
-            v[t] = 2
+      var v = null
+      var w = function e (t, n, i) {
+        if (v[t] !== 2) {
+          if (v[t] === 1) {
+            throw new Error(
+              'State "' + t + '" has illegal recursive rule definition.'
+            )
           }
+          v[t] = 1
+          var r = n[t]
+          var a = i[t]
+          for (var s in r) {
+            e(s, n, i)
+            var l = o[s]
+            for (var c in l) {
+              if (a[c]) {
+                if (!a[c].overwrite) {
+                  throw new Error(
+                    'State "' +
+                      t +
+                      '" has multiple possible rules on symbol "' +
+                      c +
+                      '".'
+                  )
+                }
+              } else a[c] = r[s]
+            }
+          }
+          v[t] = 2
         }
+      }
       v = {}
       for (c in a) {
         w(c, a, o)
@@ -145,8 +145,8 @@ let textParser = (function () {
       return a
     }
     var n = function e (n, i, o, r, a, s) {
-      var l = n[o],
-        c = null
+      var l = n[o]
+      var c = null
       r.str.length > r.pos && (c = l[r.str[r.pos]])
       if (!c && (r.str.length > r.pos && (c = l.ALL), !c)) {
         if (!(c = l.NULL)) {
@@ -166,8 +166,8 @@ let textParser = (function () {
         }
       }
       var d = function (l, c, d) {
-        var u = l.states,
-          h = []
+        var u = l.states
+        var h = []
         c && h.push(d)
         for (var p = c ? 1 : 0; p < u.length; p++) {
           var f = u[p]
@@ -181,8 +181,8 @@ let textParser = (function () {
               _++
             ) {
               if (f[_ + 1] === '-' && f[_ + 2]) {
-                var v = f.charCodeAt(_),
-                  w = f.charCodeAt(_ + 2)
+                var v = f.charCodeAt(_)
+                var w = f.charCodeAt(_ + 2)
                 if (v <= g && g <= w) break
                 _ += 2
               } else if (A === f[_]) break
@@ -382,10 +382,10 @@ let textParser = (function () {
     parser = parserCreator.create(tags, tagPoints)
   }
   const s = function (e) {
-    let rootNode = { children: [] },
-      i = rootNode,
-      o = [],
-      r = null
+    let rootNode = { children: [] }
+    let i = rootNode
+    let o = []
+    let r = null
     for (let a = 0; a < e.length; a++) {
       var s = e[a]
       r = { name: s.n, attrs: s.a, children: [] }
@@ -494,13 +494,13 @@ let nodeParser = {
           if (typeof node.name === 'string' && node.name !== '') {
             var r = node.name.toLowerCase()
             if (nodeParser.rules.hasOwnProperty(r)) {
-              var a = nodeParser.rules[r],
-                s = document.createElement(r)
+              var a = nodeParser.rules[r]
+              var s = document.createElement(r)
               if (s) {
                 if (typeof node.attrs === 'object') {
                   for (var l in node.attrs) {
-                    var c = l.toLowerCase(),
-                      d = textParser.decodeEntities(node.attrs[l])
+                    var c = l.toLowerCase()
+                    var d = textParser.decodeEntities(node.attrs[l])
                     if (c === 'class') {
                       var u = o
                         ? d.replace(/\S+/g, function (e) {
@@ -521,7 +521,7 @@ let nodeParser = {
                   node.children instanceof Array &&
                   node.children.length &&
                   nodeParser.parse(node.children, s, o),
-                  i.appendChild(s)
+                i.appendChild(s)
               }
             }
           }

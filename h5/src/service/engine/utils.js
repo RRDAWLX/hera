@@ -1,13 +1,28 @@
+/**
+ * @module
+ */
+
+/**
+ * 辅助函数 是否是devtool环境
+ * @returns {boolean}
+ * @todo 显然有误，且该功能与其他模块有重复。
+ */
 var isDevTools = function () {
   return true
 }
+
+/**
+ * 给url增加.html后缀
+ * @param {string} url
+ * @returns {string}
+ */
 var addHtmlSuffixToUrl = function (url) {
   // 给url增加.html后缀
   if (typeof url !== 'string') {
     return url
   }
-  var uri = url.split('?')[0],
-    query = url.split('?')[1]
+  var uri = url.split('?')[0]
+  var query = url.split('?')[1]
   uri += '.html'
   if (typeof query !== 'undefined') {
     return uri + '?' + query
@@ -15,6 +30,12 @@ var addHtmlSuffixToUrl = function (url) {
     return uri
   }
 }
+
+/**
+ * 去除.html后缀
+ * @param {string} url
+ * @returns {string}
+ */
 var removeHtmlSuffixFromUrl = function (url) {
   // 去除url后面的.html
   if (typeof url === 'string' && url.indexOf('.html') === url.length - 4) {
@@ -27,22 +48,33 @@ var removeHtmlSuffixFromUrl = function (url) {
 var hasOwnProperty = Object.prototype.hasOwnProperty
 
 var toString = Object.prototype.toString
+
+/**
+ * 封装报错
+ * @param {String} e 错误描述
+ */
 class AppServiceEngineKnownError extends Error {
   constructor (e) {
     super('APP-SERVICE-Engine:' + e)
     this.type = 'AppServiceEngineKnownError'
   }
 }
+
 var pageEngine = {
   getPlatform: function () {
     // get platform
     return 'devtools'
   },
+  /**
+   * 安全执行 page里面的各种函数
+   * @returns {any}
+   * @todo 重复功能
+   */
   safeInvoke: function () {
     // do page method
-    var res = void 0,
-      args = Array.prototype.slice.call(arguments),
-      fn = args[0]
+    var res = void 0
+    var args = Array.prototype.slice.call(arguments)
+    var fn = args[0]
     args = args.slice(1)
     try {
       var startTime = Date.now()
@@ -62,6 +94,12 @@ var pageEngine = {
     }
     return res
   },
+  /**
+   * 是否是空对象
+   * @param {any} obj
+   * @returns {any}
+   * @todo 与 view/virtual-dom/Utils.js 中功能类似
+   */
   isEmptyObject: function (obj) {
     for (var t in obj) {
       if (obj.hasOwnProperty(t)) {
@@ -70,13 +108,31 @@ var pageEngine = {
     }
     return true
   },
+
+  /**
+   * 拷贝
+   * Object.assign
+   * @param {any} target
+   * @param {any} obj
+   * @returns {any}
+   */
   extend: function (target, obj) {
     for (var keys = Object.keys(obj), o = keys.length; o--;) {
       target[keys[o]] = obj[keys[o]]
     }
     return target
   },
+
+  /**
+   * 空函数
+   */
   noop: function () {},
+
+  /**
+   * 获取toStringTag
+   * @param {any} param
+   * @returns {any}
+   */
   getDataType: function (param) {
     return Object.prototype.toString
       .call(param)
@@ -100,19 +156,38 @@ var pageEngine = {
   isPlainObject: function (e) {
     return toString.call(e) === '[object Object]'
   },
+
+  /**
+   * 在控制台打印错误信息。
+   **/
   error: function (title, err) {
     console.group(new Date() + ' ' + title)
     console.error(err)
     console.groupEnd()
   },
+
+  /**
+   * 在控制台打印警告信息。
+   **/
   warn: function (title, warn) {
     console.group(new Date() + ' ' + title)
     console.warn(warn)
     console.groupEnd()
   },
+
+  /**
+   * 在控制台打印信息。
+   **/
   info: function (msg) {
     __wxConfig__ && __wxConfig__.debug && console.info(msg)
   },
+
+  /**
+   * 安全执行，错误上报
+   * @param {any} fn
+   * @param {any} extend
+   * @returns {any}
+   */
   surroundByTryCatch: function (fn, extend) {
     var self = this
     return function () {
@@ -125,6 +200,7 @@ var pageEngine = {
       }
     }
   },
+
   errorReport: function (err, extend) {
     // d
     if (Object.prototype.toString.apply(err) === '[object Error]') {
@@ -138,21 +214,27 @@ var pageEngine = {
       })
     }
   },
+
+  /**
+   * 封装了钩子函数
+   * @returns {any}
+   */
   publish: function () {
-    var params = Array.prototype.slice.call(arguments),
-      defaultOpt = {
-        options: {
-          timestamp: Date.now()
-        }
+    var params = Array.prototype.slice.call(arguments)
+    var defaultOpt = {
+      options: {
+        timestamp: Date.now()
       }
+    }
     params[1]
       ? (params[1].options = this.extend(
-          params[1].options || {},
-          defaultOpt.options
-        ))
+        params[1].options || {},
+        defaultOpt.options
+      ))
       : (params[1] = defaultOpt)
     ServiceJSBridge.publish.apply(ServiceJSBridge, params)
   },
+
   AppServiceEngineKnownError: AppServiceEngineKnownError
 }
 

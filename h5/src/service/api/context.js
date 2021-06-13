@@ -14,9 +14,9 @@ function isNum (e) {
 function parseColorValue (colorStr) {
   var matchArr = null
   if ((matchArr = /^#([0-9|A-F|a-f]{6})$/.exec(colorStr)) != null) {
-    var red = parseInt(matchArr[1].slice(0, 2), 16),
-      green = parseInt(matchArr[1].slice(2, 4), 16),
-      blue = parseInt(matchArr[1].slice(4), 16)
+    var red = parseInt(matchArr[1].slice(0, 2), 16)
+    var green = parseInt(matchArr[1].slice(2, 4), 16)
+    var blue = parseInt(matchArr[1].slice(4), 16)
     return [red, green, blue, 255]
   }
 
@@ -41,9 +41,9 @@ function parseColorValue (colorStr) {
 
   if (predefinedColor.hasOwnProperty(color)) {
     matchArr = /^#([0-9|A-F|a-f]{6})$/.exec(predefinedColor[color])
-    var red = parseInt(matchArr[1].slice(0, 2), 16),
-      green = parseInt(matchArr[1].slice(2, 4), 16),
-      blue = parseInt(matchArr[1].slice(4), 16)
+    var red = parseInt(matchArr[1].slice(0, 2), 16)
+    var green = parseInt(matchArr[1].slice(2, 4), 16)
+    var blue = parseInt(matchArr[1].slice(4), 16)
     return [red, green, blue, 255]
   }
 
@@ -71,38 +71,38 @@ function deepCopy (obj) {
   return obj
 }
 
-var transformAndOthersAPI = ['scale', 'rotate', 'translate', 'save', 'restore'],
-  drawingAPI = [
-    'drawImage',
-    'fillText',
-    'fill',
-    'stroke',
-    'fillRect',
-    'strokeRect',
-    'clearRect'
-  ],
-  drawPathAPI = [
-    'beginPath',
-    'moveTo',
-    'lineTo',
-    'rect',
-    'arc',
-    'quadraticCurveTo',
-    'bezierCurveTo',
-    'closePath'
-  ],
-  styleAPI = [
-    'setFillStyle',
-    'setStrokeStyle',
-    'setGlobalAlpha',
-    'setShadow',
-    'setFontSize',
-    'setLineCap',
-    'setLineJoin',
-    'setLineWidth',
-    'setMiterLimit'
-  ],
-  curUrl = ''
+var transformAndOthersAPI = ['scale', 'rotate', 'translate', 'save', 'restore']
+var drawingAPI = [
+  'drawImage',
+  'fillText',
+  'fill',
+  'stroke',
+  'fillRect',
+  'strokeRect',
+  'clearRect'
+]
+var drawPathAPI = [
+  'beginPath',
+  'moveTo',
+  'lineTo',
+  'rect',
+  'arc',
+  'quadraticCurveTo',
+  'bezierCurveTo',
+  'closePath'
+]
+var styleAPI = [
+  'setFillStyle',
+  'setStrokeStyle',
+  'setGlobalAlpha',
+  'setShadow',
+  'setFontSize',
+  'setLineCap',
+  'setLineJoin',
+  'setLineWidth',
+  'setMiterLimit'
+]
+var curUrl = ''
 
 class ColorStop {
   constructor (type, data) {
@@ -137,9 +137,9 @@ class Context {
 
   draw () {
     var reserve =
-        arguments.length > 0 && void 0 !== arguments[0] && arguments[0],
-      canvasId = this.canvasId,
-      actions = deepCopy(this.actions)
+        arguments.length > 0 && void 0 !== arguments[0] && arguments[0]
+    var canvasId = this.canvasId
+    var actions = deepCopy(this.actions)
     this.actions = []
     this.path = []
     canvas.drawCanvas({
@@ -158,7 +158,7 @@ class Context {
   }
 }
 
-;[].concat(transformAndOthersAPI, drawingAPI).forEach(function (apiName) {
+[].concat(transformAndOthersAPI, drawingAPI).forEach(function (apiName) {
   apiName == 'fill' || apiName == 'stroke'
     ? (Context.prototype[apiName] = function () {
       this.actions.push({
@@ -199,7 +199,7 @@ class Context {
           })
           : apiName == 'drawImage'
             ? (Context.prototype[apiName] = function (t, n, o, r, a) {
-                // "devtools" == utils.getPlatform() || /wdfile:\/\//.test(t) || (t = utils.getRealRoute(curUrl, t).replace(/.html$/, "")),
+              // "devtools" == utils.getPlatform() || /wdfile:\/\//.test(t) || (t = utils.getRealRoute(curUrl, t).replace(/.html$/, "")),
               var data = isNum(r) && isNum(a) ? [t, n, o, r, a] : [t, n, o]
               this.actions.push({
                 method: apiName,
@@ -221,14 +221,14 @@ drawPathAPI.forEach(function (apiName) {
     : apiName == 'lineTo'
       ? (Context.prototype.lineTo = function () {
         this.path.length == 0
-            ? this.path.push({
-              method: 'moveTo',
-              data: [].slice.apply(arguments)
-            })
-            : this.path.push({
-              method: 'lineTo',
-              data: [].slice.apply(arguments)
-            })
+          ? this.path.push({
+            method: 'moveTo',
+            data: [].slice.apply(arguments)
+          })
+          : this.path.push({
+            method: 'lineTo',
+            data: [].slice.apply(arguments)
+          })
       })
       : (Context.prototype[apiName] = function () {
         this.path.push({
@@ -242,11 +242,11 @@ styleAPI.forEach(function (apiName) {
     ? (Context.prototype[apiName] = function () {
       var params = arguments[0]
       typeof params === 'string'
-          ? this.actions.push({
-            method: apiName,
-            data: ['normal', parseColorValue(params)]
-          })
-          : typeof params === 'object' &&
+        ? this.actions.push({
+          method: apiName,
+          data: ['normal', parseColorValue(params)]
+        })
+        : typeof params === 'object' &&
             params instanceof ColorStop &&
             this.actions.push({
               method: apiName,

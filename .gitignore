@@ -3,3 +3,5 @@ temp
 .idea/
 .vscode/
 npm-debug.log
+ios/Podfile.lock
+ios/Pods

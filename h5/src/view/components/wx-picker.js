@@ -106,7 +106,7 @@ export default window.exparser.registerElement({
         'showPickerView',
         // args,
         function (res) {
-          ;/:ok/.test(res.errMsg) &&
+          /:ok/.test(res.errMsg) &&
             ((that.value = res.index),
             that.triggerEvent('change', {
               value: that.value
@@ -144,7 +144,7 @@ export default window.exparser.registerElement({
         'showDatePickerView',
         // args,
         function (t) {
-          ;/:ok/.test(t.errMsg) &&
+          /:ok/.test(t.errMsg) &&
             ((_this.value = t.value),
             _this.triggerEvent('change', {
               value: _this.value

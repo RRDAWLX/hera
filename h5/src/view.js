@@ -9,6 +9,8 @@ import './view/api'
 import './view/exparser'
 
 import './view/exparser-component'
+import './view/behaviors'
+import './view/components'
 
 import './view/virtual-dom'
 

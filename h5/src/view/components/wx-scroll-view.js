@@ -55,33 +55,33 @@ export default window.exparser.registerElement({
     this._srollIntoViewChanged(this.scrollIntoView)
     this.__handleScroll = function (t) {
       t.preventDefault(),
-        t.stopPropagation(),
-        self._handleScroll.bind(self, t)()
+      t.stopPropagation(),
+      self._handleScroll.bind(self, t)()
     }
     this.__handleTouchMove = function (t) {
       self._checkBounce()
-      var py = t.touches[0].pageY,
-        main = self.$.main
+      var py = t.touches[0].pageY
+      var main = self.$.main
       self.__touchStartY < py
         ? main.scrollTop > 0 && t.stopPropagation()
         : main.scrollHeight > main.offsetHeight + main.scrollTop &&
           t.stopPropagation()
     }
     this.__handleTouchStart = function (t) {
-      ;(self.__touchStartY = t.touches[0].pageY),
-        HeraJSBridge.invoke(
-          'disableScrollBounce',
-          {
-            disable: !0
-          },
-          function () {}
-        )
+      (self.__touchStartY = t.touches[0].pageY),
+      HeraJSBridge.invoke(
+        'disableScrollBounce',
+        {
+          disable: !0
+        },
+        function () {}
+      )
       var main = self.$.main
       ;(self._touchScrollTop = self.$.main.scrollTop),
-        (self._touchScrollLeft = self.$.main.scrollLeft),
-        (self._touchScrollBottom =
+      (self._touchScrollLeft = self.$.main.scrollLeft),
+      (self._touchScrollBottom =
           self._touchScrollTop + main.offsetHeight === main.scrollHeight),
-        (self._touchScrollRight =
+      (self._touchScrollRight =
           self._touchScrollLeft + main.offsetWidth === main.scrollWidth)
     }
     this.__handleTouchEnd = function () {
@@ -115,34 +115,34 @@ export default window.exparser.registerElement({
   },
   detached: function () {
     this.$.main.removeEventListener('scroll', this.__handleScroll),
-      this.$.main.removeEventListener('touchstart', this.__handleTouchStart),
-      this.$.main.removeEventListener('touchmove', this.__handleTouchMove),
-      this.$.main.removeEventListener('touchend', this.__handleTouchEnd)
+    this.$.main.removeEventListener('touchstart', this.__handleTouchStart),
+    this.$.main.removeEventListener('touchmove', this.__handleTouchMove),
+    this.$.main.removeEventListener('touchend', this.__handleTouchEnd)
   },
   _getStyle: function (e, t) {
-    var ox = e ? 'auto' : 'hidden',
-      oy = t ? 'auto' : 'hidden'
+    var ox = e ? 'auto' : 'hidden'
+    var oy = t ? 'auto' : 'hidden'
     return 'overflow-x: ' + ox + '; overflow-y: ' + oy + ';'
   },
   _handleTrack: function (e) {
     return e.detail.state === 'start'
       ? ((this._x = e.detail.x),
-        (this._y = e.detail.y),
-        void (this._noBubble = null))
+      (this._y = e.detail.y),
+      void (this._noBubble = null))
       : (e.detail.state === 'end' && (this._noBubble = !1),
-        this._noBubble === null &&
+      this._noBubble === null &&
           this.scrollY &&
           (Math.abs(this._y - e.detail.y) / Math.abs(this._x - e.detail.x) > 1
             ? (this._noBubble = !0)
             : (this._noBubble = !1)),
-        this._noBubble === null &&
+      this._noBubble === null &&
           this.scrollX &&
           (Math.abs(this._x - e.detail.x) / Math.abs(this._y - e.detail.y) > 1
             ? (this._noBubble = !0)
             : (this._noBubble = !1)),
-        (this._x = e.detail.x),
-        (this._y = e.detail.y),
-        void (this._noBubble && e.stopPropagation()))
+      (this._x = e.detail.x),
+      (this._y = e.detail.y),
+      void (this._noBubble && e.stopPropagation()))
   },
   _handleScroll: function (e) {
     this._bounce ||
@@ -161,8 +161,8 @@ export default window.exparser.registerElement({
             }),
             this.scrollY)
           ) {
-            var goTop = this._lastScrollTop - main.scrollTop > 0,
-              goBottom = this._lastScrollTop - main.scrollTop < 0
+            var goTop = this._lastScrollTop - main.scrollTop > 0
+            var goBottom = this._lastScrollTop - main.scrollTop < 0
             main.scrollTop <= this.upperThreshold &&
               goTop &&
               this.triggerEvent('scrolltoupper', {
@@ -176,8 +176,8 @@ export default window.exparser.registerElement({
               })
           }
           if (this.scrollX) {
-            var goLeft = this._lastScrollLeft - main.scrollLeft > 0,
-              goRight = this._lastScrollLeft - main.scrollLeft < 0
+            var goLeft = this._lastScrollLeft - main.scrollLeft > 0
+            var goRight = this._lastScrollLeft - main.scrollLeft < 0
             main.scrollLeft <= this.upperThreshold &&
               goLeft &&
               this.triggerEvent('scrolltoupper', {
@@ -192,15 +192,15 @@ export default window.exparser.registerElement({
                 direction: 'right'
               })
           }
-          ;(this.scrollTop = this._lastScrollTop = main.scrollTop),
-            (this.scrollLeft = this._lastScrollLeft = main.scrollLeft)
+          (this.scrollTop = this._lastScrollTop = main.scrollTop),
+          (this.scrollLeft = this._lastScrollLeft = main.scrollLeft)
         }.bind(this),
         50
       )))
   },
   _checkBounce: function () {
-    var self = this,
-      main = self.$.main
+    var self = this
+    var main = self.$.main
     self._touchScrollTop === 0 &&
       (!self._bounce && main.scrollTop < 0 && (self._bounce = !0),
       self._bounce && main.scrollTop > 0 && (self._bounce = !1))

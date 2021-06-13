@@ -8,7 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		55047AE51FE7D35D0070F9E1 /* demoapp.zip in Resources */ = {isa = PBXBuildFile; fileRef = 55047AE41FE7D35D0070F9E1 /* demoapp.zip */; };
+		5526E6451FBBD8CB0014ACE6 /* RetrieveViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5526E6441FBBD8CB0014ACE6 /* RetrieveViewController.m */; };
 		5526E64E1FBC37EC0014ACE6 /* LinkViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5526E64D1FBC37EC0014ACE6 /* LinkViewController.m */; };
+		553E1C7C20175B560026BA3A /* demoapp.zip in Resources */ = {isa = PBXBuildFile; fileRef = 553E1C7B20175B560026BA3A /* demoapp.zip */; };
 		5591AEE21FCC332C00D79F47 /* AppTransitionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5591AEE11FCC332C00D79F47 /* AppTransitionViewController.m */; };
 		639123BB2E30375E1AE1F3E4 /* libPods-HeraDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 70A368766FF0A5275194A974 /* libPods-HeraDemo.a */; };
 		E94AD6991FB4546600AC5B39 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E94AD68C1FB4546600AC5B39 /* AppDelegate.m */; };
@@ -26,8 +28,12 @@
 /* Begin PBXFileReference section */
 		46D239121F20466400751BF0 /* HeraDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeraDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		55047AE41FE7D35D0070F9E1 /* demoapp.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = demoapp.zip; sourceTree = "<group>"; };
+		5526E6431FBBD8CB0014ACE6 /* RetrieveViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RetrieveViewController.h; sourceTree = "<group>"; };
+		5526E6441FBBD8CB0014ACE6 /* RetrieveViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RetrieveViewController.m; sourceTree = "<group>"; };
 		5526E64C1FBC37EC0014ACE6 /* LinkViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LinkViewController.h; sourceTree = "<group>"; };
 		5526E64D1FBC37EC0014ACE6 /* LinkViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LinkViewController.m; sourceTree = "<group>"; };
+		553E1C7B20175B560026BA3A /* demoapp.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = demoapp.zip; sourceTree = "<group>"; };
+		554E34852014D878002FC2AE /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		5591AEE01FCC332C00D79F47 /* AppTransitionViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppTransitionViewController.h; sourceTree = "<group>"; };
 		5591AEE11FCC332C00D79F47 /* AppTransitionViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppTransitionViewController.m; sourceTree = "<group>"; };
 		70A368766FF0A5275194A974 /* libPods-HeraDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-HeraDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -91,6 +97,7 @@
 		CBB8864738245ECCBC31473A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				554E34852014D878002FC2AE /* CoreLocation.framework */,
 				E94AD6A71FB45F3B00AC5B39 /* Hera.framework */,
 				70A368766FF0A5275194A974 /* libPods-HeraDemo.a */,
 			);
@@ -100,7 +107,7 @@
 		E94AD68A1FB4546600AC5B39 /* HeraDemo */ = {
 			isa = PBXGroup;
 			children = (
-				55047AE41FE7D35D0070F9E1 /* demoapp.zip */,
+				553E1C7B20175B560026BA3A /* demoapp.zip */,
 				E94AD68B1FB4546600AC5B39 /* AppDelegate.h */,
 				E94AD68C1FB4546600AC5B39 /* AppDelegate.m */,
 				E94AD68D1FB4546600AC5B39 /* Assets.xcassets */,
@@ -132,7 +139,6 @@
 				46D2390E1F20466400751BF0 /* Sources */,
 				46D2390F1F20466400751BF0 /* Frameworks */,
 				46D239101F20466400751BF0 /* Resources */,
-				4D8718A466C4B0348760E645 /* [CP] Embed Pods Frameworks */,
 				54CB6FCB5AC4EC16C13C6563 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
@@ -183,7 +189,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E94AD6A11FB4546600AC5B39 /* HeraRes.bundle in Resources */,
-				55047AE51FE7D35D0070F9E1 /* demoapp.zip in Resources */,
+				553E1C7C20175B560026BA3A /* demoapp.zip in Resources */,
 				E94AD69D1FB4546600AC5B39 /* Info.plist in Resources */,
 				E94AD69C1FB4546600AC5B39 /* Main.storyboard in Resources */,
 				E94AD69A1FB4546600AC5B39 /* Assets.xcassets in Resources */,
@@ -195,30 +201,18 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		4D8718A466C4B0348760E645 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-HeraDemo/Pods-HeraDemo-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		54CB6FCB5AC4EC16C13C6563 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-HeraDemo/Pods-HeraDemo-resources.sh",
+				"${PODS_ROOT}/MJRefresh/MJRefresh/MJRefresh.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/MJRefresh.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -231,13 +225,16 @@
 			files = (
 			);
 			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-HeraDemo-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

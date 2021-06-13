@@ -55,17 +55,22 @@ module.exports = {
     chunkFilename: '[name].wd.chunk.js',
     path: getPath(DIST_PATH)
   },
+  resolve: {
+    alias: {
+      '@': getPath('src')
+    }
+  },
   watch: watch,
   module: {
     loaders: [
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: /node_modules/,
-               query: {
-          presets: ['env', 'stage-0'],
-          babelrc: false
-        }
+        exclude: /node_modules/
+        // query: {
+        //   presets: ['@babel/preset-env'],
+        //   babelrc: false
+        // }
       },
       {
         test: /\.html/,
